@@ -1,0 +1,7 @@
+on init
+    write /sys/class/leds/lcd-backlight/brightness 75
+
+    #write /sys/class/android_usb/android0/idVendor 19D2
+    #write /sys/class/android_usb/android0/idProduct FFC1
+
+

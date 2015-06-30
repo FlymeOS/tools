@@ -1,0 +1,3 @@
+on post-fs-data
+    insmod /system/lib/modules/aed.ko
+    write /proc/sys/fs/suid_dumpable 2

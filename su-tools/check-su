@@ -1,0 +1,45 @@
+#!/bin/bash
+
+prog="$0"
+while [ -h "${prog}" ]; do
+    newProg=`/bin/ls -ld "${prog}"`
+    #echo ${newProg}
+
+
+    newProg=`expr "${newProg}" : ".* -> \(.*\)$"`
+    if expr "x${newProg}" : 'x/' >/dev/null; then
+        prog="${newProg}"
+    else
+        progdir=`dirname "${prog}"`
+        prog="${progdir}/${newProg}"
+    fi
+done
+oldwd=`pwd`
+progdir=`dirname "${prog}"`
+cd "${progdir}"
+progdir=`pwd`
+prog="${progdir}"/`basename "${prog}"`
+cd "${oldwd}"
+
+CHECK_SU=$progdir/phone-check-su
+PHONE_TMP_DIR=/data/local/tmp
+PHONE_CHECK_SU=$PHONE_TMP_DIR/phone-check-su
+
+function getRet()
+{
+	adb wait-for-device
+	adb push $CHECK_SU $PHONE_CHECK_SU
+	adb shell chmod 777 $PHONE_CHECK_SU
+
+	ret=$(adb shell sh $PHONE_CHECK_SU 2>&1 | grep OK)
+	if [ "x$ret" != "x" ]; then
+		echo "su is ok"
+		return 0
+	else
+		echo "Error: su is wrong"
+		return 1
+	fi
+}
+
+getRet
+exit $?

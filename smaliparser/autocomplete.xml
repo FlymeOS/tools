@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<autocompletes>
+    <method return="[*" content="
+# &#x0A;
+# Auto Add by coron, it's blank &#x0A;
+# It should return an array, return null instead &#x0A;
+# &#x0A;
+# You better modify here by yourself, if you got NullPointerException after invoked this method &#x0A;
+# Warning: Can not just copy this method from vendor, it musted used some unexist field or class &#x0A;
+# &#x0A;
+    .locals 1 &#x0A;
+&#x0A;
+    .prologue &#x0A;
+    const/4 v0, 0x0 &#x0A;
+&#x0A;
+    return-object v0 &#x0A;
+.end method &#x0A;" />
+    
+    <method return="L*" content="
+# &#x0A;
+# Auto Add by coron, it's blank &#x0A;
+# It should return an object, return null instead &#x0A;
+# &#x0A;
+# You better modify here by yourself, if you got NullPointerException after invoked this method &#x0A;
+# Warning: Can not just copy this method from vendor, it musted used some unexist field or class &#x0A;
+# &#x0A;
+    .locals 1 &#x0A;
+&#x0A;
+    .prologue &#x0A;
+    const/4 v0, 0x0 &#x0A;
+&#x0A;
+    return-object v0 &#x0A;
+.end method &#x0A;" />
+    
+    <method return="B" content="  
+# &#x0A;
+# Auto Add by coron, it's blank &#x0A;
+# It should return a byte, return 0 instead &#x0A;
+# &#x0A;
+# You better modify here by yourself, if you found it is wrong for just return 0 &#x0A;
+# Warning: Can not just copy this method from vendor, it musted used some unexist field or class &#x0A;
+# &#x0A;
+    .locals 1 &#x0A;
+&#x0A;
+    .prologue &#x0A;
+    const/4 v0, 0x0 &#x0A;
+&#x0A;
+    return v0 &#x0A;
+.end method &#x0A;" />
+    
+    <method return="C" content="
+# &#x0A;
+# Auto Add by coron, it's blank &#x0A;
+# It should return a char, return 0 instead &#x0A;
+# &#x0A;
+# You better modify here by yourself, if you found it is wrong for just return 0 &#x0A;
+# Warning: Can not just copy this method from vendor, it musted used some unexist field or class &#x0A;
+# &#x0A;
+    .locals 1 &#x0A;
+&#x0A;
+    .prologue &#x0A;
+    const/4 v0, 0x0 &#x0A;
+&#x0A;
+    return v0 &#x0A;
+.end method &#x0A;" />
+    
+    <method return="D" content="
+# &#x0A;
+# Auto Add by coron, it's blank &#x0A;
+# It should return a double, return 0 instead &#x0A;
+# &#x0A;
+# You better modify here by yourself, if you found it is wrong for just return 0 &#x0A;
+# Warning: Can not just copy this method from vendor, it musted used some unexist field or class &#x0A;
+# &#x0A;
+    .locals 2 &#x0A;
+&#x0A;
+    .prologue &#x0A;
+    const-wide/16 v0, 0x0 &#x0A;
+&#x0A;
+    return-wide v0 &#x0A;
+.end method &#x0A;" />
+    
+    <method return="F" content="
+# &#x0A;
+# Auto Add by coron, it's blank &#x0A;
+# It should return a float, return 0 instead &#x0A;
+# &#x0A;
+# You better modify here by yourself, if you found it is wrong for just return 0 &#x0A;
+# Warning: Can not just copy this method from vendor, it musted used some unexist field or class &#x0A;
+# &#x0A;
+    .locals 1 &#x0A;
+&#x0A;
+    .prologue &#x0A;
+    const/4 v0, 0x0 &#x0A;
+&#x0A;
+    return v0 &#x0A;
+.end method &#x0A;" />
+
+    <method return="I" content="
+# &#x0A;
+# Auto Add by coron, it's blank &#x0A;
+# It should return an int, return 0 instead &#x0A;
+# &#x0A;
+# You better modify here by yourself, if you found it is wrong for just return 0 &#x0A;
+# Warning: Can not just copy this method from vendor, it musted used some unexist field or class &#x0A;
+# &#x0A;
+    .locals 1 &#x0A;
+&#x0A;
+    .prologue &#x0A;
+    const/4 v0, 0x0 &#x0A;
+&#x0A;
+    return v0 &#x0A;
+.end method &#x0A;" />
+        
+    <method return="J" content="
+# &#x0A;
+# Auto Add by coron, it's blank &#x0A;
+# It should return an long, return 0 instead &#x0A;
+# &#x0A;
+# You better modify here by yourself, if you found it is wrong for just return 0 &#x0A;
+# Warning: Can not just copy this method from vendor, it musted used some unexist field or class &#x0A;
+# &#x0A;
+    .locals 2 &#x0A;
+&#x0A;
+    .prologue &#x0A;
+    const-wide/16 v0, 0x0 &#x0A;
+&#x0A;
+    return-wide v0 &#x0A;
+.end method &#x0A;" />
+        
+    <method return="S" content="
+# &#x0A;
+# Auto Add by coron, it's blank &#x0A;
+# It should return an short, return 0 instead &#x0A;
+# &#x0A;
+# You better modify here by yourself, if you found it is wrong for just return 0 &#x0A;
+# Warning: Can not just copy this method from vendor, it musted used some unexist field or class &#x0A;
+# &#x0A;
+    .locals 1 &#x0A;
+&#x0A;
+    .prologue &#x0A;
+    const/4 v0, 0x0 &#x0A;
+&#x0A;
+    return v0 &#x0A;
+.end method &#x0A;" />
+        
+    <method return="V" content="
+# &#x0A;
+# Auto Add by coron, it's blank &#x0A;
+# return-void &#x0A;
+# &#x0A;
+# You better modify here by yourself, if you found it is wrong for doing nothing &#x0A;
+# Warning: Can not just copy this method from vendor, it musted used some unexist field or class &#x0A;
+# &#x0A;
+    .locals 0 &#x0A;
+&#x0A;
+    .prologue &#x0A;
+    return-void &#x0A;
+.end method &#x0A;" />
+        
+    <method return="Z" content="
+# &#x0A;
+# Auto Add by coron, it's blank &#x0A;
+# It should return a boolean, return false instead &#x0A;
+# &#x0A;
+# You better modify here by yourself, if you found it is wrong for just return false &#x0A;
+# Warning: Can not just copy this method from vendor, it musted used some unexist field or class &#x0A;
+# &#x0A;
+    .locals 1 &#x0A;
+&#x0A;
+    .prologue &#x0A;
+    const/4 v0, 0x0 &#x0A;
+&#x0A;
+    return v0 &#x0A;
+.end method &#x0A;" />
+</autocompletes>

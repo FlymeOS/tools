@@ -1,0 +1,24 @@
+# Android fstab file.
+#<src>                                         <mnt_point>  <type>  <mnt_flags and options>  <fs_mgr_flags>
+# The filesystem that contains the filesystem checker binary (typically /system) cannot
+# specify MF_CHECK, and must come before any filesystems that do specify MF_CHECK
+
+/dev/block/platform/msm_sdcc.1/by-name/system         /system      ext4    ro,barrier=1                                wait
+/dev/block/platform/msm_sdcc.1/by-name/userdata     /data           ext4    noatime,nosuid,nodev,barrier=1,data=ordered,noauto_da_alloc,journal_async_commit,errors=panic wait,check,encryptable=footer,length=-16384
+/dev/block/platform/msm_sdcc.1/by-name/cache        /cache          ext4    noatime,nosuid,nodev,barrier=1,data=ordered,noauto_da_alloc,journal_async_commit,errors=panic wait,check
+/dev/block/platform/msm_sdcc.1/by-name/persist      /persist        ext4    nosuid,nodev,barrier=1,data=ordered,nodelalloc,nomblk_io_submit,errors=panic wait
+/dev/block/platform/msm_sdcc.1/by-name/boot         /boot           emmc    defaults                                                        defaults
+/dev/block/platform/msm_sdcc.1/by-name/recovery     /recovery       emmc    defaults                                                        defaults
+/dev/block/platform/msm_sdcc.1/by-name/modem          /firmware       vfat    ro,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337        wait
+/dev/block/platform/msm_sdcc.1/by-name/misc         /misc           emmc    defaults                                                        defaults
+/dev/block/platform/msm_sdcc.1/by-name/sbl1         /sbl1           emmc    defaults                                                        defaults
+/dev/block/platform/msm_sdcc.1/by-name/tz           /tz             emmc    defaults                                                        defaults
+/dev/block/platform/msm_sdcc.1/by-name/rpm          /rpm            emmc    defaults                                                        defaults
+/dev/block/platform/msm_sdcc.1/by-name/sdi          /sdi            emmc    defaults                                                        defaults
+/dev/block/platform/msm_sdcc.1/by-name/aboot        /aboot          emmc    defaults                                                        defaults
+/dev/block/platform/msm_sdcc.1/by-name/splash       /splash         emmc    defaults                                                        defaults
+
+
+/devices/msm_sdcc.1/mmc_host                          auto         vfat    defaults         voldmanaged=sdcard0:23,nonremovable,noemulatedsd
+/devices/msm_sdcc.2/mmc_host                          auto         vfat    defaults         voldmanaged=sdcard1:auto
+/devices/platform/xhci-hcd/usb1                       auto	   vfat     defaults         voldmanaged=usbdisk:auto

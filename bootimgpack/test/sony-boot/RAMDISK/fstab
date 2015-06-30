@@ -1,0 +1,5 @@
+# These declarations must match the mount statements in
+# <buildroot>/device/semc/fuji/files/init.fuji.rc
+
+/data    ext4 /dev/block/mmcblk0p14
+/cache   ext4 /dev/block/mmcblk0p13

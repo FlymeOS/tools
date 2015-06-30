@@ -1,0 +1,162 @@
+# ++ ZTE: lixingyuan@20111215
+
+on init
+    write /sys/class/android_usb/android0/iSerial $ro.serialno
+    write /sys/class/android_usb/android0/f_rndis/manufacturer ZTE
+    write /sys/class/android_usb/android0/f_rndis/vendorID 19d2
+    write /sys/class/android_usb/android0/f_rndis/wceis 1
+
+on boot
+#    write /sys/class/android_usb/android0/iManufacturer $ro.product.manufacturer
+#    write /sys/class/android_usb/android0/iProduct $ro.product.model
+    write /sys/class/android_usb/android0/iManufacturer ZTE
+    write /sys/class/android_usb/android0/iProduct ZTE-U970
+
+on property:sys.usb.config=cdrom
+    write /sys/class/android_usb/android0/enable 0
+	write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0120
+    write /sys/class/android_usb/android0/bcdDevice 0401
+	write /sys/class/android_usb/android0/iSerial 0000000U970CDROM
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    setprop sys.usb.state $sys.usb.config
+
+on property:sys.usb.config=mass_storage
+    write /sys/class/android_usb/android0/enable 0
+	write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0120
+    write /sys/class/android_usb/android0/bcdDevice 1000
+	write /sys/class/android_usb/android0/iSerial 000000000000DISK
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    setprop sys.usb.state $sys.usb.config
+
+on property:sys.usb.config=com,mtp
+    write /sys/class/android_usb/android0/enable 0
+	write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0261
+    write /sys/class/android_usb/android0/bcdDevice 0100
+	write /sys/class/android_usb/android0/iSerial $ro.serialno.commtp
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    setprop sys.usb.state $sys.usb.config
+
+on property:sys.usb.config=com,mtp,adb
+    write /sys/class/android_usb/android0/enable 0
+	write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0261
+    write /sys/class/android_usb/android0/bcdDevice 0100
+	write /sys/class/android_usb/android0/iSerial $ro.serialno.commtpadb
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    start adbd
+    setprop sys.usb.state $sys.usb.config
+
+on property:sys.usb.config=com,ptp
+    write /sys/class/android_usb/android0/enable 0
+	write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0261
+    write /sys/class/android_usb/android0/bcdDevice 0000
+	write /sys/class/android_usb/android0/iSerial 0000000000000COM
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    setprop sys.usb.state $sys.usb.config
+
+on property:sys.usb.config=com,ptp,adb
+    write /sys/class/android_usb/android0/enable 0
+	write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0261
+    write /sys/class/android_usb/android0/bcdDevice 0000
+	write /sys/class/android_usb/android0/iSerial 0000000000000COM
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    start adbd
+    setprop sys.usb.state $sys.usb.config
+
+on property:sys.usb.config=mtp
+    write /sys/class/android_usb/android0/enable 0
+	write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0287
+    write /sys/class/android_usb/android0/bcdDevice 0100
+	write /sys/class/android_usb/android0/iSerial $ro.serialno.mtp
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    setprop sys.usb.state $sys.usb.config
+
+on property:sys.usb.config=mtp,adb
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0287
+    write /sys/class/android_usb/android0/bcdDevice 0101
+	write /sys/class/android_usb/android0/iSerial $ro.serialno.mtpadb
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    start adbd
+    setprop sys.usb.state $sys.usb.config
+
+on property:sys.usb.config=ptp
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0287
+    write /sys/class/android_usb/android0/bcdDevice 0200
+	write /sys/class/android_usb/android0/iSerial $ro.serialno.ptp
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    setprop sys.usb.state $sys.usb.config
+
+on property:sys.usb.config=ptp,adb
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0287
+    write /sys/class/android_usb/android0/bcdDevice 0200
+	write /sys/class/android_usb/android0/iSerial $ro.serialno.ptpadb
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    start adbd
+    setprop sys.usb.state $sys.usb.config
+
+on property:sys.usb.config=com
+    write /sys/class/android_usb/android0/enable 0
+	write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0263
+    write /sys/class/android_usb/android0/bcdDevice 0100
+	write /sys/class/android_usb/android0/iSerial $ro.serialno.com
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    setprop sys.usb.state $sys.usb.config
+	
+on property:sys.usb.config=com,adb
+    write /sys/class/android_usb/android0/enable 0
+	write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0263
+    write /sys/class/android_usb/android0/bcdDevice 0100
+	write /sys/class/android_usb/android0/iSerial $ro.serialno.comadb
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+	start adbd
+    setprop sys.usb.state $sys.usb.config
+	
+ on property:sys.usb.config=rndis
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0288
+    write /sys/class/android_usb/android0/bcdDevice 0000
+	write /sys/class/android_usb/android0/iSerial $ro.serialno.rndis
+#   write /sys/class/android_usb/android0/bDeviceClass 224
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    setprop sys.usb.state $sys.usb.config
+
+on property:sys.usb.config=rndis,adb
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 19d2
+    write /sys/class/android_usb/android0/idProduct 0288
+    write /sys/class/android_usb/android0/bcdDevice 0000
+	write /sys/class/android_usb/android0/iSerial $ro.serialno.rndisadb
+#   write /sys/class/android_usb/android0/bDeviceClass 224
+    write /sys/class/android_usb/android0/functions $sys.usb.config
+    write /sys/class/android_usb/android0/enable 1
+    start adbd
+    setprop sys.usb.state $sys.usb.config
+

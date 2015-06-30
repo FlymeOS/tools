@@ -1,0 +1,71 @@
+#!/bin/bash
+# author: tangliuxiang
+
+function usage()
+{
+	echo "USAGE: su-pull <remote> <local>"
+	echo "			- copy file/dir from device to pc"
+	echo "Just like the usage of adb pull"
+}
+
+prog="$0"
+while [ -h "${prog}" ]; do
+    newProg=`/bin/ls -ld "${prog}"`
+    #echo ${newProg}
+
+    newProg=`expr "${newProg}" : ".* -> \(.*\)$"`
+    if expr "x${newProg}" : 'x/' >/dev/null; then
+        prog="${newProg}"
+    else
+        progdir=`dirname "${prog}"`
+        prog="${progdir}/${newProg}"
+    fi
+done
+oldwd=`pwd`
+progdir=`dirname "${prog}"`
+cd "${progdir}"
+progdir=`pwd`
+prog="${progdir}"/`basename "${prog}"`
+cd "${oldwd}"
+
+if [ $# -lt 2 ]; then
+	usage
+	exit 1
+fi
+
+src=$1
+target=$2
+
+src_basename=`basename $src`
+CHECK_SU=$progdir/check-su
+pcp=$progdir/phone-cp
+ptmp_su_pull=/data/local/tmp/su_pull_tmp
+phone_cp=/data/local/tmp/phone-cp
+
+if [ x"$target" == x ];then
+	target=$PWD/$src_basename
+fi
+
+adb wait-for-device
+
+$CHECK_SU
+if [ $? != 0 ]; then
+	echo "Error: failed to pull $src to $target"
+	echo "     You better make sure you have an correct su, you can run check-su to test if su is ok"
+	exit 1
+fi
+
+adb push $pcp $phone_cp
+adb shell chmod 777 $phone_cp
+
+echo "begin copy $src to $ptmp_su_pull/$src_basename"
+#echo "su -c \"rm -rf $ptmp_su_pull; mkdir -p $ptmp_su_pull; chmod 777 $ptmp_su_pull; $phone_cp $src $ptmp_su_pull/$src_basename; chmod -R 777 $ptmp_su_pull/$src_basename\"; exit" | adb shell
+adb shell su -c "rm -rf $ptmp_su_pull";
+adb shell su -c "mkdir -p $ptmp_su_pull";
+adb shell su -c "chmod 777 $ptmp_su_pull";
+adb shell su -c "$phone_cp $src $ptmp_su_pull/$src_basename";
+adb shell su -c "chmod -R 777 $ptmp_su_pull/$src_basename";
+
+adb pull $ptmp_su_pull/$src_basename $target
+#echo "su -c \"rm -rf $ptmp_su_pull\"; exit" | adb shell
+adb shell su -c "rm -rf $ptmp_su_pull";

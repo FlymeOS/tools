@@ -1,0 +1,51 @@
+/dev/knvmap	0660	system	system
+/dev/nvmap	0666	system	system
+/dev/tegra_avp	0660	media	media
+/dev/tegra_rpc	0660	media	media
+/dev/tegra_sema	0660	media	media
+/dev/tegra_mediaserver	0660	media	media
+/dev/ov5650	0660	media	camera
+/dev/ov2710	0660	media	camera
+# /* ZTE: add by yaoling for new camera 20110810 ++ */
+/dev/ov5640	0660	media	camera
+/dev/mt9v114	0660	media	camera
+/dev/adp1655	0660	media	camera
+# /* ZTE: add by yaoling for new camera 20110810 -- */
+# /* ZTE: add by yaoling for new camera 20111026 ++ */
+/dev/ov7692	0660	media	camera
+# /* ZTE: add by yaoling for new camera 20111026 -- */
+/dev/sh532u	0660	media	camera
+/dev/tegra_camera	0660	media	camera
+/dev/camera*	0660	media	camera
+/dev/focuser*	0660	media	camera
+/dev/torch*	0660	media	camera
+/dev/spdif*	0660	system	audio
+/dev/video0	0660	media	camera
+/dev/video1	0660	media	camera
+/dev/tegra_dc*	0660	system	system
+/dev/ttyACM*    0660    radio   system
+/dev/mpu        0640    system  system
+/dev/mpuirq     0640    system  system
+/dev/accelirq	0640	system	system
+/dev/timerirq	0640	system	system
+/dev/nvhdcp0    0666    system  system
+/dev/nvhdcp1    0666    system  system
+/dev/tf_driver  0666    system  system
+/dev/ion	0666	system	system
+# ++ ZTE: lixingyuan@20110801
+/dev/ttyHS0	0600	radio	radio
+/dev/gsmtty*	0660	radio	radio
+/dev/gsmtty18	0777	media	media
+/dev/gsmtty20	0666	radio	radio
+/dev/gsmtty22	0666	radio	radio
+/dev/gsmtty23	0666	radio	radio
+/dev/gsmtty25	0666	radio	radio
+/dev/gsmtty26	0666	radio	radio
+/dev/ttyGS*	0660	radio	radio
+# -- ZTE: lixingyuan@20110801
+/dev/akm8962_aot	0660   compass    system
+/dev/taos	0640	system	system
+# ++ ZTE: zhangdakai@20120303 for cts
+/dev/block/mmcblk0p5 0660 radio system
+#ZTE: zuoziqiang add for TI codec reg dump
+/dev/tiload_node	0640	system	system

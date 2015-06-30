@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<fstab>
+    <array name = "attr">
+        <item>block</item>
+        <item>size</item>
+        <item>start</item>
+        <item>fstype</item>
+        <item>mp</item>
+        <item>length</item>
+    </array>
+    
+    <block name = "boot">"bootimg"</block>
+    <block name = "recovery">"recovery"</block>
+    <block name = "system">"android"</block>
+    <block name = "cache">"cache"</block>
+    <block name = "data">"usrdata"</block>
+
+</fstab>
