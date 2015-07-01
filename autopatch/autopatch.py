@@ -231,14 +231,13 @@ class ReviseExecutor:
             return "%s %s" % (Paint.red("  [FAIL]"), execute)
 
         # Only format access method and res id
-        action = Format.ACCESS_TO_NAME | Format.RESID_TO_NAME
+        action = Format.RESID_TO_NAME
         formatSource = Format(AutoPatch.NEWER_ROOT, source).do(action)
         formatTarget = Format(AutoPatch.TARGET_ROOT, target).do(action)
 
         shutil.copy(source, target)
 
         # Would not change res name back
-        action = Format.ACCESS_TO_NAME
         formatSource.undo(action)
         formatTarget.undo(action)
 
