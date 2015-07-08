@@ -26,7 +26,7 @@ RESOLUTION :=
 ##############################################################################
 # The value decides whether use prebuilt image or pack from the BOOT or RECOVERY directory in the vendor directory.
 # Support values: boot, recovery or nothing.
-# The default value is nothing.
+# The default value is boot.
 # When the value is boot or recovery, the system of build will pack boot.img or recovery.img
 # from the BOOT or vendor RECOVERY in the vendor directory which might contain your changes.
 # When the value is nothing, the system of build will check boot.img or recovery.img in the project root directory.
