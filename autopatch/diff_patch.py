@@ -244,24 +244,26 @@ class SmaliSplitter:
 
         # Compare older and newer content
         if olderContent == newerContent:
-            # BOSP has no change on AOSP.
-            # Still handle this case: "access$" method
-            if newerPart.find("access$") >= 0:
-                Log.d(TAG, "  [Might useful access part %s ] " % newerPart)
-
-                lines = []
-                lines.append("\n# Remove the first '#' if you want to enable this method. It might be invoked from codes of BOSP.\n")
-                for line in newerContent.splitlines():
-                    if len(line) > 0: line = "#%s\n" % line
-                    lines.append(line)
-
-                newerHandle.seek(0)
-                newerHandle.truncate()
-                newerHandle.writelines(lines)
-                newerHandle.close()
-                self.mPartList.append(newerPart)
-            else:
-                newerHandle.close()
+            # No need to handle access any more
+            # # BOSP has no change on AOSP.
+            # # Still handle this case: "access$" method
+            # if newerPart.find("access$") >= 0:
+            #     Log.d(TAG, "  [Might useful access part %s ] " % newerPart)
+            #
+            #     lines = []
+            #     lines.append("\n# Remove the first '#' if you want to enable this method. It might be invoked from codes of BOSP.\n")
+            #     for line in newerContent.splitlines():
+            #         if len(line) > 0: line = "#%s\n" % line
+            #         lines.append(line)
+            #
+            #     newerHandle.seek(0)
+            #     newerHandle.truncate()
+            #     newerHandle.writelines(lines)
+            #     newerHandle.close()
+            #     self.mPartList.append(newerPart)
+            # else:
+            #     newerHandle.close()
+            newerHandle.close()
         else:
             # BOSP has changes on AOSP.
 

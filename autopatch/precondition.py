@@ -26,7 +26,7 @@ from reverses.zipformatter import ZipFormatter
 
 TAG="precondition"
 
-FRAMEWORK_JARS = ("framework.jar", "services.jar", "telephony-common.jar", "android.policy.jar",
+FRAMEWORK_JARS = ("framework.jar", "services.jar", "telephony-common.jar", "wifi-service.jar", "android.policy.jar",
                   "secondary-framework.jar", "secondary_framework.jar",
                   "framework-ext.jar", "framework_ext.jar",
                   "framework2.jar",
@@ -42,6 +42,7 @@ USELESS_DIRS   = ("framework.jar.out/smali/com/flyme", "framework.jar.out/smali/
                   "framework.jar.out/original",
                   "services.jar.out/original",
                   "telephony-common.jar.out/original",
+                  "wifi-service.jar.out/original",
                   "android.policy.jar.out/original",
                   "framework-res/original")
 
@@ -169,15 +170,15 @@ class Prepare:
             ChangeList(OPTIONS.olderRoot, OPTIONS.newerRoot, OPTIONS.patchXml).make(force=True)
 
         else:
-            if OPTIONS.commit1 != None:
+            if OPTIONS.commit1 is not None:
                 self.baseDevice.setLastHead(OPTIONS.commit1)
 
             # Phase 1: get last and origin head from base device
             (lastHead, origHead) = self.baseDevice.getLastAndOrigHead()
             if lastHead == origHead:
-                Log.w(TAG, Paint.red("Nothing to upgrade. Did you forget to sync the %s ?" %OPTIONS.baseName))
-                Log.w(TAG, Paint.red("In the root of coron, try the following command to sync:"))
-                Log.w(TAG, Paint.red("  $ repo sync devices/%s" %OPTIONS.baseName))
+                Log.w(TAG, Paint.red("Nothing to upgrade. Did you forget to sync the %s ?" % OPTIONS.baseName))
+                Log.w(TAG, Paint.red("In the root directory, try the following command to sync:"))
+                Log.w(TAG, Paint.red("  $ repo sync devices/%s" % OPTIONS.baseName))
 
             # Phase 2: porting from last to origin head
             OPTIONS.commit1 = lastHead[0:7]
@@ -207,6 +208,17 @@ class Prepare:
         commitModel.restore()
 
         # Phase 4: prepare patch XML
+
+        # TODO Fix upgrade no wifi-service.jar.out
+        # Temporary solution, remove the following code later
+        wifi_service = os.path.join(OPTIONS.olderRoot, "wifi-service.jar.out")
+        if not os.path.exists(wifi_service):
+            src = os.path.join(self.baseDevice.basePath, "vendor/aosp/wifi-service.jar.out")
+            if os.path.exists(src):
+                subp = Utils.run(["cp", "-r", src, OPTIONS.olderRoot], stdout=subprocess.PIPE)
+                subp.communicate()
+        # Temporary solution, remove the above code later
+
         ChangeList(OPTIONS.olderRoot, OPTIONS.newerRoot, OPTIONS.patchXml).make(force=True)
 
 
@@ -657,6 +669,7 @@ class Utils:
 
         relRoot = filepath.split("/")[0]
         result = relRoot[0:-4] in FRAMEWORK_JARS
+        result |= (relRoot == "framework-res")
         Log.d(TAG, "Utils.isInFramework(): %s, %s -> %s" %(result, filepath, relRoot))
         return result
 

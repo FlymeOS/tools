@@ -78,14 +78,14 @@ class Error:
 
         if Error.TOTAL_CONFLICTS > 0:
             print Paint.bold("%3d conflicts in %d files, go through the reject files in 'autopatch/reject' to find them out" % (Error.TOTAL_CONFLICTS, Error.CONFLICT_FILE_NUM))
-            print Paint.red("\n  Ask for advice? Please type 'coron help CONFLICTS_HAPPENED' \n")
+            print Paint.red("\n  Ask for advice? Please type 'flyme help CONFLICTS_HAPPENED' \n")
 
 
     @staticmethod
     def report():
 
         if len(Error.FAILED_LIST) == 0:
-            print Paint.green("\n  Ask for advice? Please type 'coron help NO_CONFLICT' \n")
+            print Paint.green("\n  Ask for advice? Please type 'flyme help NO_CONFLICT' \n")
         else:
             Error.createAllRejects()
 

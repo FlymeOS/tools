@@ -74,7 +74,7 @@ vendor_saved_apps := Bluetooth KeyChain HTMLViewer UserDictionaryProvider Backup
 # You need to decode android.policy.jar to the project directory (use apktool d android.policy.jar) first,
 # and then you can make it by:   make android.policy
 #-----------------------------------------------------------------------------
-vendor_modify_jars := android.policy framework services telephony-common
+vendor_modify_jars := android.policy framework services telephony-common wifi-service
 
 ##############################################################################
 # The value decides which board system directory you want to save.
@@ -134,10 +134,10 @@ board_saved_files := lib/libsqlite.so lib/libwebviewchromium.so
 
 
 # The property decide your ID on the backend server which statistical data for your device.
-# The default value is FlymeRomer.
-# You should configure the property according to your ID, ie, replace "FlymeRomer" with your ID.
-#override_property += \
-#    ro.flyme.romer=FlymeRomer
+# The default value is Flyme.
+# You should configure the property according to your ID, ie, replace "Flyme" with your ID.
+override_property += \
+    ro.flyme.romer=Flyme
 
 ##############################################################################
 # The value decides which property you will remove from the build.prop.

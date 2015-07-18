@@ -70,8 +70,9 @@ class TargetFinder:
                 part2 = match.group("part2")
                 part3 = match.group("part3")
 
+                if not os.path.exists(part1):
+                    return target
 
-                a = os.listdir(part1)
                 for subDir in os.listdir(part1):
                     if subDir.startswith("smali") and subDir != part2:
                         newTarget = os.path.join(part1, subDir, part3)

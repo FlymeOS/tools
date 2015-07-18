@@ -16,7 +16,7 @@ NEW_MAKEFILE=$WORK_DIR/Makefile
 MAKECONFIG_ROOT=$PORT_ROOT/tools/config
 DENSITY_CFG=$MAKECONFIG_ROOT/density.cfg
 TEMPLATE_MAKEFILE=$MAKECONFIG_ROOT/Makefile.template
-VENDOR_MODIFY_JARS_SUGGEST="framework|services|telephony-common|android.policy"
+VENDOR_MODIFY_JARS_SUGGEST="framework|services|telephony-common|wifi-service|android.policy"
 VENDOR_SAVED_APPS_SUGGEST="MtkBt|FMTransmitter|FMRadio|Bluetooth|FmRadio|.*Stk.*"
 
 PULL_BOOT_RECOVERY=pull_boot_recovery
