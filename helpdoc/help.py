@@ -28,6 +28,7 @@ Type `help name' to find out more about the `name'.
 import os
 import sys
 import types
+import locale
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -80,7 +81,10 @@ class HelpModel:
     @staticmethod
     def retrieve_xml_by_locale():
         d = os.path.dirname(os.path.realpath(__file__))
-        f = open(os.path.join(d, "locale"), "r")
+        if "zh" in os.popen('echo $LANG').read():
+            f = open(os.path.join(d, "locale_cn"), "r")
+        else:
+            f = open(os.path.join(d, "locale"), "r")
         locale = f.read().rstrip()
         f.close()
 
