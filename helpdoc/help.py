@@ -28,7 +28,6 @@ Type `help name' to find out more about the `name'.
 import os
 import sys
 import types
-import locale
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
