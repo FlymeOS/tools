@@ -76,16 +76,30 @@ class idtoname(object):
         rId = '%s%s' % (high16Str[idx:], '0000')
         return (rId,high16Str[0:idx])
 
+    def getIdByApktool2High16(self, high16Str):
+        idx = high16Str.index('0x')
+        rId = high16Str[idx:]
+        return (rId,high16Str[0:idx])
+
     def idtoname(self):
-        normalIdRule = re.compile(r'0x(?:[1-9a-f]|7f)[0-1][0-9a-f]{5}')
+        normalIdRule = re.compile(r'0x(?:[1-9a-f]|7f)[0-1][0-9a-f]{5}$', re.M)
         arrayIdRule = re.compile(r'(?:0x[0-9a-f]{1,2}t ){3}0x(?:[1-9a-f]|7f)t')
-        high16IdRule = re.compile(r'const/high16[ ]*v[0-9][0-9]*,[ ]*0x(?:[1-9a-f]|7f)[0-1][0-9a-f]')
+        high16IdRule = re.compile(r'const/high16[ ]*v[0-9][0-9]*,[ ]*0x(?:[1-9a-f]|7f)[0-1][0-9a-f]$', re.M)
+        apktool2High16IdRule = re.compile(r'const/high16[ ]*v[0-9][0-9]*,[ ]*0x(?:[1-9a-f]|7f)[0-1][0-9a-f]0000$', re.M)
 
         for smaliFile in self.smaliFileList:
             #print "start modify: %s" % smaliFile
             sf = file(smaliFile, 'r+')
             fileStr = sf.read()
             modify = False
+
+            for matchApktool2Hight16IdStr in list(set(apktool2High16IdRule.findall(fileStr))):
+                (rId, preStr) = self.getIdByApktool2High16(matchApktool2Hight16IdStr)
+                name = self.idToNameMap.get(rId, None)
+                if name is not None:
+                    fileStr = fileStr.replace(matchApktool2Hight16IdStr, r'%s#%s#i' % (preStr, name))
+                    modify = True
+                    Log.d("change id from %s to name %s" % (matchApktool2Hight16IdStr, name))
 
             for matchId in list(set(normalIdRule.findall(fileStr))):
                 name = self.idToNameMap.get(matchId, None)
@@ -108,6 +122,7 @@ class idtoname(object):
                 if name is not None:
                     fileStr = fileStr.replace(matchHigh16IdStr, r'%s#%s#h' % (preStr, name))
                     modify = True
+                    Log.d("change id from %s to name %s" % (matchHigh16IdStr, name))
 
             if modify is True:
                 sf.seek(0, 0)

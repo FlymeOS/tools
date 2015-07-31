@@ -86,16 +86,34 @@ class nametoid(object):
         hName = high16Str[idx:]
         return (hName,high16Str[0:idx])
 
+    def getApktool2High16Name(self, high16Str):
+        idx = high16Str.index('#')
+        hName = high16Str[idx:]
+        return (hName,high16Str[0:idx])
+
     def nametoid(self):
         normalNameRule = re.compile(r'#[^ \t\n]*@[^ \t\n]*#t')
         arrayNameRule = re.compile(r'#[^ \t\n]*@[^ \t\n]*#a')
         high16NameRule = re.compile(r'const/high16[ ]*v[0-9][0-9]*,[ ]*#[^ \t\n]*@[^ \t\n]*#h')
+        apktool2High16IdRule = re.compile(r'const/high16[ ]*v[0-9][0-9]*,[ ]*#[^ \t\n]*@[^ \t\n]*#i')
 
         for smaliFile in self.smaliFileList:
 #           print "start modify: %s" % smaliFile
             sf = file(smaliFile, 'r+')
             fileStr = sf.read()
             modify = False
+
+            for matchApktool2HightName in list(set(apktool2High16IdRule.findall(fileStr))):
+                (hName, preStr) = self.getApktool2High16Name(matchApktool2HightName)
+                newId = self.nameToIdMap.get(hName[1:-2], None)
+                if newId is not None:
+                    if newId[-4:] != '0000':
+                        newStr = r'const%s%s' % (preStr[nametoid.CONST_LEN:], newId)
+                    else:
+                        newStr = r'%s%s' % (preStr, newId)
+                    fileStr = fileStr.replace(matchApktool2HightName, newStr)
+                    modify = True
+                    Log.d(">>> change name from %s to id %s" % (matchApktool2HightName, newStr))
 
             for matchArrName in  list(set(arrayNameRule.findall(fileStr))):
                 arrId = self.nameToIdMap.get(matchArrName[1:-2], None)
