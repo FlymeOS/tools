@@ -34,7 +34,7 @@ function unpack_bootimg()
 function check_result()
 {
 	#[ ! -e $OUTPUT/dt.img ] && exit 1
-	[ ! -e $OUTPUT/zImage ] && exit 1
+	[ ! -e $OUTPUT/kernel ] && exit 1
 	[ ! -e $OUTPUT/RAMDISK/init.rc ] && exit 1
 }
 

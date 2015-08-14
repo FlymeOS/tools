@@ -254,7 +254,7 @@ class ReviseExecutor:
 
         execute = "  MERGE  " + target
 
-        if not os.path.exists(target) :
+        if not os.path.exists(target):
             Error.fileNotFound(target)
             return "%s %s" % (Paint.red("  [FAIL]"), execute)
 

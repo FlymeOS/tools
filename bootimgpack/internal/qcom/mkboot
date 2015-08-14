@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 #boot.img tool
-
+#by xiaolu
 trap "clean" 2 3 4
 workdir=$(pwd)
 toolpath=$(readlink -f $0)
@@ -37,6 +37,30 @@ clean()
     exit
 }
 
+unpack_complete()
+{
+    [ ! -z $format ] && echo format=$format >> ../img_info
+    pout "Unpack completed."
+    exit
+}
+
+zip_command()
+{
+    if [ "$1" == lzop ]; then
+        zcommand="lzop -n -f -9"
+    elif [ "$1" == lz4 ]; then
+        # Coron start: fix bug of lz4 can not be found
+        zcommand="$tooldir/lz4 -f -9"
+        # Coron end
+    elif [ "$1" == lzma ]; then
+        zcommand="lzma -f -c"
+    elif [ "$1" == xz ]; then
+        zcommand="xz -f -c"
+    else
+        zcommand="gzip -n -f"
+    fi
+}
+
 usage()
 {
     pout "<Unpack and repack boot.img tool>"
@@ -51,6 +75,7 @@ usage()
 
 print_info()
 {
+    [ ! -z "$board" ] && pout "  board          : $board"  
     pout "  kernel         : $kernel"
     pout "  ramdisk        : $ramdisk"
     pout "  page size      : $page_size"
@@ -72,13 +97,14 @@ print_info()
 mkboot_img()
 {
     error=0
-    if [ $dtb_size -gt 0 ]; then
-        dtb="--dt ${dt}"
-    fi
-    $mkbootimg --kernel $kernel --ramdisk $ramdisk \
+    [ $second_size -gt 0 ] && second="--second ${second}"
+    [ $dtb_size -gt 0 ] && dtb="--dt ${dt}"
+
+    $mkbootimg --kernel $kernel --ramdisk $ramdisk --board "$board" \
         --base $base_addr --ramdisk_offset $ramdisk_offset \
         --tags_offset $tags_offset --cmdline "$cmd_line" \
-        --pagesize $page_size $dtb -o $1 || error=1
+        --pagesize $page_size $second $dtb -o $1 || error=1
+
     [ $error -eq 1 ] && return $error
     ramdisk_size=$(stat -c "%s" $ramdisk)
     boot_size=$(stat -c "%s" $1)
@@ -111,39 +137,46 @@ if [ ! -z $mkboot_from_dir ]; then
         pout "img_info file have not enough parameters."
         clean
     fi
+    [ -z $second_size ] && second_size=0
     [ -z $dtb_size ] && dtb_size=0
     if [ -d $ramdisk ]; then
-        #cd $ramdisk
-        #find . | cpio -R 0:0 -H newc -o 2>/dev/null | gzip > $unpacked_dir/new_ramdisk.gz
-        $mkbootfs $ramdisk | gzip > new_ramdisk.gz
-        ramdisk=new_ramdisk.gz
+        [ -z $format ] && format=gzip
+        zip_command $format
+        #cd $ramdisk; find . | fakeroot cpio -R 0:0 -H newc -o 2>/dev/null \
+        #    | $zcommand > $unpacked_dir/new_ramdisk; cd $unpacked_dir
+        $mkbootfs $ramdisk | $zcommand > new_ramdisk
+        ramdisk=new_ramdisk
         ramdisk_size=$(stat -c "%s" $ramdisk)
     fi
-    #cd $unpacked_dir
-    #print_info
+    print_info
+    pout "ramdisk is $format format."
     rm -f $new_img
     mkboot_img $new_img || perr "Make boot.img Error! pls check img_info file."
     #pout "Add SEANDROIDENFORCE tag."
     #printf SEANDROIDENFORCE >> $new_img
-    rm -f new_ramdisk.gz
+    rm -f new_ramdisk
     clean
 fi
 
+# Coron Start: No need to ask
 #split boot.img to dir.
-if [ -e $2 ]; then
-    read -p "$2 exists, delete?(N/y)" reply
-    case $reply in
-        y | Y)
-        rm -rf $2
-        ;;
-    *)
-        exit
-        ;;
-    esac
-fi
+#if [ -e $2 ]; then
+#    read -p "$2 exists, delete?(N/y)" reply
+#    case $reply in
+#        y | Y)
+#        rm -rf $2
+#        ;;
+#    *)
+#        exit
+#        ;;
+#    esac
+#fi
+# Coron End
 
 tempdir="$(readlink -f $2)"
+# Coron start: Using $2 as tempdir
 [ -z $tempdir ] && tempdir=$2
+# Coron end
 mkdir -p $tempdir
 pout "Unpack & decompress $1 to $2"
 
@@ -169,7 +202,10 @@ ramdisk_size=$(od -A n -D -j 16 -N 4 $bootimg | sed 's/ //g')
 second_size=$(od -A n -D -j 24 -N 4 $bootimg | sed 's/ //g')
 page_size=$(od -A n -D -j 36 -N 4 $bootimg | sed 's/ //g')
 dtb_size=$(od -A n -D -j 40 -N 4 $bootimg | sed 's/ //g')
-cmd_line=$(od -A n --strings -j 64 -N 512 $bootimg)
+#cmd_line=$(od -A n --strings -j 64 -N 512 $bootimg)
+#board=$(od -A n --strings -j 48 -N 16 $bootimg)
+cmd_line=$(od -A n -S1 -j 64 -N 512 $bootimg)
+board=$(od -A n -S1 -j 48 -N 16 $bootimg)
 
 base_addr=$((kernel_addr-0x00008000))
 kernel_offset=$((kernel_addr-base_addr))
@@ -177,11 +213,17 @@ ramdisk_offset=$((ramdisk_addr-base_addr))
 second_offset=$((second_addr-base_addr))
 tags_offset=$((tags_addr-base_addr))
 
-base_addr=$(printf "0x%08x" $base_addr)
-kernel_offset=$(printf "0x%08x" $kernel_offset)
-ramdisk_offset=$(printf "0x%08x" $ramdisk_offset)
-second_offset=$(printf "0x%08x" $second_offset)
-tags_offset=$(printf "0x%08x" $tags_offset)
+base_addr=$(printf "%08x" $base_addr)
+kernel_offset=$(printf "%08x" $kernel_offset)
+ramdisk_offset=$(printf "%08x" $ramdisk_offset)
+second_offset=$(printf "%08x" $second_offset)
+tags_offset=$(printf "%08x" $tags_offset)
+
+base_addr=0x${base_addr:0-8}
+kernel_offset=0x${kernel_offset:0-8}
+ramdisk_offset=0x${ramdisk_offset:0-8}
+second_offset=0x${second_offset:0-8}
+tags_offset=0x${tags_offset:0-8}
 
 k_count=$(((kernel_size+page_size-1)/page_size))
 r_count=$(((ramdisk_size+page_size-1)/page_size))
@@ -192,12 +234,19 @@ r_offset=$((k_offset+k_count))
 s_offset=$((r_offset+r_count))
 d_offset=$((s_offset+s_count))
 
-#zImage
-dd if=$bootimg of=zImage_tmp bs=$page_size skip=$k_offset count=$k_count 2>/dev/null
-dd if=zImage_tmp of=zImage bs=$kernel_size count=1 2>/dev/null
-#ramdisk.gz
+#kernel
+dd if=$bootimg of=kernel_tmp bs=$page_size skip=$k_offset count=$k_count 2>/dev/null
+dd if=kernel_tmp of=kernel bs=$kernel_size count=1 2>/dev/null
+#ramdisk.packed
 dd if=$bootimg of=ramdisk_tmp bs=$page_size skip=$r_offset count=$r_count 2>/dev/null
-dd if=ramdisk_tmp of=ramdisk.gz bs=$ramdisk_size count=1 2>/dev/null
+dd if=ramdisk_tmp of=ramdisk.packed bs=$ramdisk_size count=1 2>/dev/null
+#second
+if [ $second_size -gt 0 ]; then
+   dd if=$bootimg of=second.img.tmp bs=$page_size skip=$s_offset count=$s_count 2>/dev/null
+   dd if=second.img.tmp of=second.img bs=$second_size count=1 2>/dev/null
+   s_name="second=second.img\n"
+   s_size="second_size=$second_size\n"
+fi
 #dtb
 if [ $dtb_size -gt 0 ]; then
     dd if=$bootimg of=dt.img_tmp bs=$page_size skip=$d_offset count=$d_count 2>/dev/null
@@ -209,42 +258,58 @@ if [ $dtb_size -gt 0 ]; then
 fi
 rm -f *_tmp $(basename $1) $bootimg
 
-kernel=zImage
+kernel=kernel
 ramdisk=ramdisk
 [ ! -s $kernel ] && clean
 #print boot.img info
 print_info
 
-#write info to img_info,decompression ramdisk.gz
-printf "kernel=zImage\nramdisk=RAMDISK\n${dt_name}page_size=$page_size\n\
-kernel_size=$kernel_size\nramdisk_size=$ramdisk_size\n${dt_size}base_addr=$base_addr\nkernel_offset=$kernel_offset\n\
-ramdisk_offset=$ramdisk_offset\ntags_offset=$tags_offset\ncmd_line=\"$cmd_line\"\n" > img_info
+esq="'\"'\"'"
+escaped_cmd_line=`echo $cmd_line | sed "s/'/$esq/g"`
+
+#write info to img_info,decompression ramdisk.packed
+# Coron start: capitalize ramdisk
+printf "kernel=kernel\nramdisk=RAMDISK\n${s_name}${dt_name}page_size=$page_size\n\
+kernel_size=$kernel_size\nramdisk_size=$ramdisk_size\n${s_size}${dt_size}base_addr=$base_addr\nkernel_offset=$kernel_offset\n\
+ramdisk_offset=$ramdisk_offset\ntags_offset=$tags_offset\ncmd_line=\'$escaped_cmd_line\'\nboard=\"$board\"\n" > img_info
 mkdir RAMDISK
 cd RAMDISK
+# Coron end: capitalize ramdisk
 
-gzip -t ../ramdisk.gz
-if [ $? -gt 0 ]; then
-
-    lzma -t ../ramdisk.gz
-    if [ $? -gt 0 ]; then
-        #try lz4
-        $tooldir/lz4 -d ../ramdisk.gz ../ramdisk.cpio
-        if [ $? -gt 0 ]; then
-            pout "ramdisk is unknown format,can't unpack ramdisk"
-    	    rm ../ramdisk.cpio
-        else
-            pout "ramdisk is lz4 format."
-            cpio -i -d -m  --no-absolute-filenames 2>/dev/null < ../ramdisk.cpio
-        fi
-    else
-        pout "ramdisk is lzma format."
-        lzma -d -c ../ramdisk.gz | cpio -i -d -m  --no-absolute-filenames 2>/dev/null
-    fi
-else
+gzip -t ../ramdisk.packed 2>/dev/null
+if [ $? -eq 0 ]; then
     pout "ramdisk is gzip format."
-    gzip -d -c ../ramdisk.gz | cpio -i -d -m  --no-absolute-filenames 2>/dev/null
+    format=gzip
+    gzip -d -c ../ramdisk.packed | cpio -i -d -m  --no-absolute-filenames 2>/dev/null
+    unpack_complete
 fi
-#Unpack Finish to exit.
-pout "Unpack completed."
-exit
+lzma -t ../ramdisk.packed 2>/dev/null
+if [ $? -eq 0 ]; then
+    pout "ramdisk is lzma format."
+    format=lzma
+    lzma -d -c ../ramdisk.packed | cpio -i -d -m  --no-absolute-filenames 2>/dev/null
+    unpack_complete
+fi
+xz -t ../ramdisk.packed 2>/dev/null
+if [ $? -eq 0 ]; then
+    pout "ramdisk is xz format."
+    format=xz
+    xz -d -c ../ramdisk.packed | cpio -i -d -m  --no-absolute-filenames 2>/dev/null
+    unpack_complete
+fi
+lzop -t ../ramdisk.packed 2>/dev/null
+if [ $? -eq 0 ]; then
+    pout "ramdisk is lzo format."
+    format=lzop
+    lzop -d -c ../ramdisk.packed | cpio -i -d -m  --no-absolute-filenames 2>/dev/null
+    unpack_complete
+fi
+$tooldir/lz4 -d ../ramdisk.packed 2>/dev/null | cpio -i -d -m  --no-absolute-filenames 2>/dev/null
+if [ $? -eq 0 ]; then
+    pout "ramdisk is lz4 format."
+    format=lz4
+else
+    pout "ramdisk is unknown format,can't unpack ramdisk"
+fi
+unpack_complete
 

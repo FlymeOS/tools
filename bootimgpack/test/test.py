@@ -1,92 +1,132 @@
 #!/usr/bin/python
-# Filename test.py
 
 __author__ = 'duanqz@gmail.com'
 
 
 import os
-import pickle
+import sys
+
 import shutil
-from os import sys, path
+import unittest
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
+
+from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-from internal.bootimg import Bootimg
+from internal import bootimg
 
 
-def assertTypeEquals(bootfile, bootType):
+class TestUnpack(unittest.TestCase):
 
-    # Unpack
-    Bootimg(bootfile).unpack("OUT/")
+    def setUp(self):
+        self.dir = path.dirname(path.abspath(__file__))
 
-    # Load type
-    fileHandle = open("OUT/type.config", "r")
+    def test_unpack_common(self):
+        boot_img = path.join(self.dir, "common-boot.img")
+        Utils.assert_type_equals(boot_img, "QCOM")
 
-    # Assert
-    assert bootType == fileHandle.read()
+    def test_unpack_common_v1(self):
+        boot_img = path.join(self.dir, "common-v1-boot.img")
+        Utils.assert_type_equals(boot_img, "QCOM")
 
-    # Clear
-    fileHandle.close()
-    shutil.rmtree("OUT/")
+    def test_unpack_qcom(self):
+        boot_img = path.join(self.dir, "qcom-boot.img")
+        Utils.assert_type_equals(boot_img, "QCOM")
+
+    def test_unpack_mtk(self):
+        boot_img = path.join(self.dir, "mtk-boot.img")
+        Utils.assert_type_equals(boot_img, "MTK")
+
+    def test_unpack_sony(self):
+        boot_img = path.join(self.dir, "sony-boot.img")
+        Utils.assert_type_equals(boot_img, "SONY")
 
 
-def assetPackSucc(bootfile):
-    Bootimg(bootfile).pack("out.img")
+class TestPack(unittest.TestCase):
 
-    assert os.path.exists("out.img")
+    def setUp(self):
+        self.dir = path.dirname(path.abspath(__file__))
 
-    os.remove("out.img")
+    def test_pack_common(self):
+        boot_dir = path.join(self.dir, "common-boot")
+        Utils.asset_pack_succ(boot_dir)
 
-### Start
+    def test_pack_common_v1(self):
+        boot_dir = path.join(self.dir, "common-v1-boot")
+        Utils.asset_pack_succ(boot_dir)
+
+    def test_pack_mtk(self):
+        boot_dir = path.join(self.dir, "mtk-boot")
+        Utils.asset_pack_succ(boot_dir)
+
+    def test_pack_qcom(self):
+        boot_dir = path.join(self.dir, "qcom-boot")
+        Utils.asset_pack_succ(boot_dir)
+
+    def test_pack_sony(self):
+        boot_dir = path.join(self.dir, "sony-boot")
+        Utils.asset_pack_succ(boot_dir)
+
+
+class TestToolKit(unittest.TestCase):
+
+    def test_existing(self):
+        assert path.exists(bootimg.Toolkit.TOOLKIT_XML)
+
+    def test_content_valid(self):
+        all_tools = {}
+        sequence = {}
+
+        tree = ET.parse(bootimg.Toolkit.TOOLKIT_XML)
+        for tool in tree.findall("tool"):
+            seq = tool.attrib["seq"]
+            boot_type = tool.attrib["type"]
+            description = tool.attrib["description"]
+
+            unpack_tool = tool.find("unpack").text
+            pack_tool = tool.find("pack").text
+            all_tools[boot_type] =  { "UNPACK" : path.join(bootimg.Toolkit.TOOLS_ROOT, unpack_tool),
+                                      "PACK"   : path.join(bootimg.Toolkit.TOOLS_ROOT, pack_tool) }
+            sequence[seq] = (boot_type, description)
+
+        assert len(sequence) == 5
+
+        assert "MTK" in all_tools
+        assert "SONY" in all_tools
+        assert "COMMON" in all_tools
+        assert "COMMON-V1" in all_tools
+        assert "QCOM" in all_tools
+
+
+class Utils:
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def assert_type_equals(boot_img, boot_type):
+
+        bootimg.unpack(boot_img, "OUT/")
+
+        f = open("OUT/type.config", "r")
+
+        f_boot_type = f.read()
+
+        f.close()
+        shutil.rmtree("OUT/")
+
+        assert boot_type == f_boot_type
+
+    @staticmethod
+    def asset_pack_succ(boot_dir):
+        bootimg.pack(boot_dir, "out.img")
+
+        assert path.exists("out.img")
+
+        os.remove("out.img")
+
+
 if __name__ == '__main__':
-
-    testDir = path.dirname(path.abspath(__file__)) + "/"
-
-    print ">>> Test unpack common boot.img"
-    bootfile = os.path.join(testDir, "common-boot.img")
-    assertTypeEquals(bootfile, "COMMON-V1")
-    print "<<< Pass\n"
-
-    print ">>> Test unpack common v1 boot.img"
-    bootfile = os.path.join(testDir, "common-v1-boot.img")
-    assertTypeEquals(bootfile, "COMMON-V1")
-    print "<<< Pass\n"
-
-    print ">>> Test unpack qcom boot.img"
-    bootfile = os.path.join(testDir, "qcom-boot.img")
-    assertTypeEquals(bootfile, "QCOM")
-    print "<<< Pass\n"
-
-    print ">>> Test unpack mtk boot.img"
-    bootfile = os.path.join(testDir, "mtk-boot.img")
-    assertTypeEquals(bootfile, "MTK")
-    print "<<< Pass\n"
-
-    print ">>> Test unpack sony boot.img"
-    bootfile = os.path.join(testDir, "sony-boot.img")
-    assertTypeEquals(bootfile, "SONY")
-    print "<<< Pass\n"
-
-    print ">>> Test pack common boot.img"
-    bootfile = os.path.join(testDir, "common-boot")
-    assetPackSucc(bootfile)
-    print "<<< Pass\n"
-
-    print ">>> Test pack common v1 boot.img"
-    bootfile = os.path.join(testDir, "common-v1-boot")
-    assetPackSucc(bootfile)
-    print "<<< Pass\n"
-
-    print ">>> Test pack qcom boot.img"
-    bootfile = os.path.join(testDir, "qcom-boot")
-    assetPackSucc(bootfile)
-    print "<<< Pass\n"
-
-    print ">>> Test pack mtk boot.img"
-    bootfile = os.path.join(testDir, "mtk-boot")
-    assetPackSucc(bootfile)
-    print "<<< Pass\n"
-
-    print ">>> Test pack sony boot.img"
-    bootfile = os.path.join(testDir, "sony-boot")
-    assetPackSucc(bootfile)
-    print "<<< Pass\n"
-
+    unittest.main()

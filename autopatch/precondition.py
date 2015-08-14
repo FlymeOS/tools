@@ -208,17 +208,6 @@ class Prepare:
         commitModel.restore()
 
         # Phase 4: prepare patch XML
-
-        # TODO Fix upgrade no wifi-service.jar.out
-        # Temporary solution, remove the following code later
-        wifi_service = os.path.join(OPTIONS.olderRoot, "wifi-service.jar.out")
-        if not os.path.exists(wifi_service):
-            src = os.path.join(self.baseDevice.basePath, "vendor/aosp/wifi-service.jar.out")
-            if os.path.exists(src):
-                subp = Utils.run(["cp", "-r", src, OPTIONS.olderRoot], stdout=subprocess.PIPE)
-                subp.communicate()
-        # Temporary solution, remove the above code later
-
         ChangeList(OPTIONS.olderRoot, OPTIONS.newerRoot, OPTIONS.patchXml).make(force=True)
 
 

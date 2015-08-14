@@ -8,7 +8,7 @@ __author__ = 'duanqz@gmail.com'
 import os
 from os import sys, path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-from internal.bootimg import Bootimg
+from internal import bootimg
 
 from Tkinter import *
 import tkFileDialog
@@ -102,7 +102,7 @@ class Main:
             output =  self.__bootDirText.get()
 
             if len(bootfile) > 0 :
-                Bootimg(bootfile).unpack(output)
+                bootimg.unpack(bootfile, output)
                 result = "Unpack " + bootfile + " --> " + output
                 self.__resultText.set(result)
 
@@ -111,7 +111,7 @@ class Main:
             output = self.__bootImgText.get()
 
             if len(bootfile) > 0 :
-                Bootimg(bootfile).pack(output)
+                bootimg.pack(bootfile, output)
                 result = "Pack " + bootfile + " --> " + output
                 self.__resultText.set(result)
 
