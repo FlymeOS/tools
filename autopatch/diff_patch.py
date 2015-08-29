@@ -51,7 +51,8 @@ class DiffPatch():
         (target, older, newer) = splitters.aquire(self.mTarget, self.mOlder, self.mNewer)
 
         # Delete the unnecessary part
-        for targetPart in target.getAllParts():
+        # Here should use deep copy of the list, otherwise will cause leak deleting
+        for targetPart in target.getAllParts()[:]:
             olderPart = older.match(targetPart)
             newerPart = newer.match(targetPart)
 

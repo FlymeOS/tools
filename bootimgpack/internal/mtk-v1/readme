@@ -1,0 +1,29 @@
+1、unpack command：
+boot.img:
+./unpack.pl boot.img
+
+recovery.img:
+./unpack.pl recovery.img
+
+2、repack command：
+repack boot.img:
+./repack.pl -boot kernel ramdisk/ boot-new.img
+
+repack recovery.img:
+./repack.pl -recovery kernel ramdisk/ recovery-new.img
+
+
+
+### bootimgpack
+
+mtk-v1, support mt6752. https://github.com/cofface/android-mtk-tools.git
+
+We made changes:
+
+1. Capitalize ramdisk after unpack.pl
+
+2. Do NOT clean_files after repack
+
+
+
+

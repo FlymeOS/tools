@@ -88,7 +88,7 @@ vendor_modify_jars := android.policy framework services telephony-common wifi-se
 # The default value is nothing.
 # You can configure the board system file path which relative to the system directory in the board release.
 #-----------------------------------------------------------------------------
-board_saved_files := lib/libsqlite.so lib/libwebviewchromium.so
+board_saved_files := lib/libwebviewchromium.so
 
 ##############################################################################
 # The value decides which board system apk you want to remove.
@@ -134,10 +134,10 @@ board_saved_files := lib/libsqlite.so lib/libwebviewchromium.so
 
 
 # The property decide your ID on the backend server which statistical data for your device.
-# The default value is Flyme.
-# You should configure the property according to your ID, ie, replace "Flyme" with your ID.
+# The default value is Unofficial.
+# You should configure the property according to your ID, ie, replace "Unofficial" with your ID.
 override_property += \
-    ro.flyme.romer=Flyme
+    ro.flyme.romer=Unofficial
 
 ##############################################################################
 # The value decides which property you will remove from the build.prop.

@@ -72,6 +72,7 @@ class Toolkit:
         remain_seqs = sorted(self.sequence.keys())
         # Try to unpack boot image for each type,
         # choose the appropriate one.
+        print "Trying to unpack:"
         for seq in sorted(self.sequence.keys()):
 
             # Delete from remain_seqs
@@ -81,12 +82,13 @@ class Toolkit:
             (boot_type, description) = self.sequence.get(seq)
             unpack_tool = self.get_tools(boot_type, "UNPACK")
             if Utils.try_unpack(unpack_tool, boot_img):
-                print "Succeed trying with %s(%s) " % (boot_type, description)
+                print " Succeed trying with %s(%s) " % (boot_type, description)
                 break
             else:
-                print "Failed trying with %s(%s)" % (boot_type, description)
+                print " Failed trying with %s(%s)" % (boot_type, description)
 
         if len(remain_seqs) > 0:
+            print " "
             print "You might manually try unpacking with the remaining if %s does not actually work:" % boot_type
             for seq in remain_seqs:
                 (remain_boot_type, description) = self.sequence.get(seq)
@@ -219,10 +221,10 @@ def unpack(boot_img, output):
     (status, result) = commands.getstatusoutput(cmd)
 
     if status != 0:
-        print "Unpack failed"
+        print "\n* Unpack failed"
         print result
     else:
-        print "Unpack %s %s --> %s" % (boot_type, boot_img, output)
+        print "\n* Unpack %s %s --> %s" % (boot_type, boot_img, output)
 
     # Store the used tools to output
     Utils.write_boot_img_type(boot_type, output)
