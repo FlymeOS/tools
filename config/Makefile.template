@@ -133,11 +133,15 @@ board_saved_files := lib/libwebviewchromium.so
 #    qemu.hw.mainkeys=0
 
 
-# The property decide your ID on the backend server which statistical data for your device.
+# The value of the property ro.flyme.romer will be contained in the ota package name.
 # The default value is Unofficial.
 # You should configure the property according to your ID, ie, replace "Unofficial" with your ID.
+# The property ro.product.model_romer decide your ID on the backend server which statistical data for your device.
+# The default value is Nexus-5_Unofficial.
+# You should configure the property according to your device and your ID with replace the "Nexus-5_Unofficial".
 override_property += \
-    ro.flyme.romer=Unofficial
+    ro.flyme.romer=Unofficial \
+    ro.product.model_romer=Nexus-5_Unofficial
 
 ##############################################################################
 # The value decides which property you will remove from the build.prop.
