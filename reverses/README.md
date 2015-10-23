@@ -1,3 +1,6 @@
+Android 6.0			23	Marshmallow
+Android 5.1			22	Lollipop
+Android 5.0			21	Lollipop
 Android 4.4			19	KITKAT
 Android 4.3			18	JELLY_BEAN_MR2
 Android 4.2, 4.2.2		17	JELLY_BEAN_MR1
