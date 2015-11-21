@@ -66,7 +66,7 @@ class prebuilt(object):
         Constructor
         '''
         if bsys is None:
-            bsys = os.path.join(PORT_ROOT, "flyme/release/system")
+            bsys = os.path.join(PORT_ROOT, "flyme/release/arm/system")
 
         if vsys is None:
             vsys = os.path.join(PORT_ROOT, "devices/base/vendor/system")
