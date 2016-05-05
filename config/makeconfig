@@ -37,6 +37,7 @@ RESOLUTION=""
 vendor_modify_jars=""
 vendor_saved_apps=""
 
+FROM_RECOVERY=0
 ######## Error Exit Num ##########
 ERR_USB_NOT_CONNECTED=151
 ERR_DEVICE_NOT_ROOTED=152
@@ -58,6 +59,13 @@ function checkAdbConnect()
 	fi
 }
 
+function checkRecovery {
+    if adb devices | grep -i "recovery" > /dev/null; then
+        FROM_RECOVERY=1
+    else
+        FROM_RECOVERY=0 
+    fi
+}
 
 # wait for the device to be online or timeout
 function waitForDeviceOnline ()
@@ -224,11 +232,36 @@ function getDensity()
 	fi
 }
 
+# In recovery mode, extract the recovery.fstab from device
+function extract_recovery_fstab {
+if [ ! -f $WORK_DIR/recovery.fstab ];then
+    adb shell cat /etc/recovery.fstab | awk '{print $1 "\t" $2 "\t" $3}'> $WORK_DIR/recovery.fstab
+fi
+}
+# In recovery mode, dump the boot image from device
+function dump_bootimage {
+if [ ! -f $WORK_DIR/boot.img ];then
+        local info=`adb shell cat /etc/recovery.fstab | grep boot | sed -e "s/\s\+/:/g"`
+        local fstype=`echo $info | cut -d":" -f2`
+        if [ "$fstype" == "mtd" ]; then
+            mtdn=`adb shell cat /proc/mtd | grep boot | cut -f1 -d":"`
+            device=/dev/$fstype/$mtdn
+        else
+            device=`echo $info | cut -d":" -f3`
+        fi
+        adb pull $device $WORK_DIR/boot.img
+fi
+}
 function getVendorModifyJars()
 {
 	frameworkListFile=$(mktemp -t -u frameworkList.XXXX)
 
 	if [ $FROM_OTA == 0 ];then
+		if [ $FROM_RECOVERY == 1 ];then
+			adb shell mount /system
+			extract_recovery_fstab
+			dump_bootimage
+		fi
 		adb shell "if [ -f /data/local/tmp/framework-list ]; then rm /data/local/tmp/framework-list; fi"
 		adb shell "ls /system/framework/ > /data/local/tmp/framework-list"
 		adb pull /data/local/tmp/framework-list $frameworkListFile > /dev/null 2>&1
@@ -395,6 +428,7 @@ function prepare_boot_recovery()
 # start a new project
 function newMakefile()
 {
+	checkRecovery
 	checkRootState
 	setupMakefile
 	prepare_boot_recovery
