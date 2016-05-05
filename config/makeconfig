@@ -28,6 +28,7 @@ PRJ_GIT_IGNORE=$WORK_DIR/.gitignore
 FROM_OTA=0
 FROM_DAT=0
 OTA_PACKAGE=$WORK_DIR/ota.zip
+ROM_PACKAGE=$WORK_DIR/rom.zip
 DAT_PACKAGE=$WORK_DIR/system.new.dat
 OUT=$WORK_DIR/out
 OUT_OTA_DIR=$OUT/ota
@@ -156,18 +157,20 @@ function checkEnvironment()
 		FROM_OTA=1
 	fi
 
-	if [ -f $DAT_PACKAGE ];then
+	if [ -f $ROM_PACKAGE ];then
 		echo ">>> Device is not online, but system.new.dat is exist."
-		echo ">>> Config Makefile from $DAT_PACKAGE."
+		echo ">>> Config Makefile from $ROM_PACKAGE."
 		FROM_DAT=1
 	fi
 }
 
 function checkDATPackage()
 {
-	echo ">>> Unzip $DAT_PACKAGE ..."
+	echo ">>> Unzip $ROM_PACKAGE ..."
 	mkdir -p $OUT tmp
-	./sdat2img.py system.transfer.list system.new.dat system.img &> /dev/null
+	rm -rf $OUT_OTA_DIR
+	unzip -q $ROM_PACKAGE -d $OUT_OTA_DIR
+	python $DAT_PACKING_TOOL $OUT_OTA_DIR/system.transfer.list $OUT_OTA_DIR/system.new.dat system.img &> /dev/null
         sudo mount -t ext4 -o loop system.img tmp/
 	sudo chown -R nian:nian tmp
 	mkdir -p $OUT_SYSTEM
