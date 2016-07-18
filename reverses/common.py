@@ -137,8 +137,8 @@ class Utils:
             buff = subp.stdout.readline().strip('\n')
             if buff == '' and subp.poll() != None:
                 break
-
-            Log.d(TAG, buff)
+            if len(buff) > 0:
+                Log.d(TAG, buff)
 
 
 
