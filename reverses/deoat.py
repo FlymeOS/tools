@@ -153,12 +153,13 @@ class OatZip:
         threadPrivApp = threading.Thread(target = OatZip.deoatAppWithArch, args = (self.mPrivAppDir, self.mFrwDir, self.arch, self.arch2))
         threadPrivApp.start()
 
-        threadVendorApp = threading.Thread(target = OatZip.deoatAppWithArch, args = (self.mVendorAppDir, self.mFrwDir, self.arch, self.arch2))
-        threadVendorApp.start()
+        if os.path.exists(self.mVendorAppDir):
+            threadVendorApp = threading.Thread(target = OatZip.deoatAppWithArch, args = (self.mVendorAppDir, self.mFrwDir, self.arch, self.arch2))
+            threadVendorApp.start()
+            threadVendorApp.join()
 
         threadApp.join()
         threadPrivApp.join()
-        threadVendorApp.join()
 
         # Phase 4: de-oat framework
         # de-oat framework
@@ -184,9 +185,10 @@ class OatZip:
         if self.arch2.strip():
             OatZip.repackageAppWithArch(self.mPrivAppDir, self.arch2)
 
-        OatZip.repackageAppWithArch(self.mVendorAppDir, self.arch)
-        if self.arch2.strip():
-            OatZip.repackageAppWithArch(self.mVendorAppDir, self.arch2)
+        if os.path.exists(self.mVendorAppDir):
+            OatZip.repackageAppWithArch(self.mVendorAppDir, self.arch)
+            if self.arch2.strip():
+                OatZip.repackageAppWithArch(self.mVendorAppDir, self.arch2)
 
         # repackage framework
         #$framedir/$arch
