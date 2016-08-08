@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
 # Copyright 2015 Coron
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -48,10 +48,11 @@ class OatZip:
     def __init__(self, unzipRoot):
         self.mRoot = unzipRoot
 
-        self.mFrwDir = os.path.join(self.mRoot, "system/framework")
-        self.mAppDir = os.path.join(self.mRoot, "system/app")
+        self.mFrwDir     = os.path.join(self.mRoot, "system/framework")
+        self.mAppDir     = os.path.join(self.mRoot, "system/app")
         self.mPrivAppDir = os.path.join(self.mRoot, "system/priv-app")
-        self.mVendorAppDir = os.path.join(self.mRoot, "system/vendor/app")
+        self.mAllAppDirList = [self.mFrwDir, self.mAppDir, self.mPrivAppDir]
+        self.mSystemDir = os.path.join(self.mRoot, "system")
 
         self.findArch()
 
@@ -153,11 +154,6 @@ class OatZip:
         threadPrivApp = threading.Thread(target = OatZip.deoatAppWithArch, args = (self.mPrivAppDir, self.mFrwDir, self.arch, self.arch2))
         threadPrivApp.start()
 
-        if os.path.exists(self.mVendorAppDir):
-            threadVendorApp = threading.Thread(target = OatZip.deoatAppWithArch, args = (self.mVendorAppDir, self.mFrwDir, self.arch, self.arch2))
-            threadVendorApp.start()
-            threadVendorApp.join()
-
         threadApp.join()
         threadPrivApp.join()
 
@@ -185,11 +181,6 @@ class OatZip:
         if self.arch2.strip():
             OatZip.repackageAppWithArch(self.mPrivAppDir, self.arch2)
 
-        if os.path.exists(self.mVendorAppDir):
-            OatZip.repackageAppWithArch(self.mVendorAppDir, self.arch)
-            if self.arch2.strip():
-                OatZip.repackageAppWithArch(self.mVendorAppDir, self.arch2)
-
         # repackage framework
         #$framedir/$arch
         OatZip.repackageFrwWithArch(self.mFrwDir, os.path.join(self.mFrwDir, self.arch))
@@ -197,6 +188,9 @@ class OatZip:
         #$framedir/$arch/dex
         if os.path.exists(os.path.join(self.mFrwDir, self.arch, "dex")):
             OatZip.repackageFrwWithArch(self.mFrwDir, os.path.join(self.mFrwDir, self.arch, "dex"))
+
+        # deal with additional apks not in system/framework system/app system/priv-app
+        OatZip.dealWithAdditionalApks(self.mSystemDir, self.mFrwDir, self.arch, self.arch2, self.mAllAppDirList)
 
         # Remove arch and arch2 dir
         os.chdir(self.mRoot)
@@ -223,6 +217,44 @@ class OatZip:
         Log.i(TAG, "De-oat %s" % bootOAT)
         Utils.runWithOutput([OatZip.OAT2DEX, "boot", bootOAT])
 
+    @staticmethod
+    def packageDexToAppWithArch(apkFile, arch):
+
+        # Keep the old directory, we will change back after some operations.
+        oldDir = os.path.abspath(os.curdir)
+
+        apkPath = os.path.dirname(apkFile)
+        appName = os.path.basename(apkFile)
+        app = appName[0:-4]
+
+        archPath = os.path.join(apkPath, arch)
+
+        # chagnge to arch path
+        os.chdir(archPath)
+
+        Log.d(TAG, "Repackage %s" %(apkFile))
+
+        dexFile = os.path.join(archPath, app + ".dex")
+
+        # mv $appdir/$app/$arch/$app.dex $appdir/$app/$arch/classes.dex
+        shutil.move(dexFile, os.path.join(archPath, "classes.dex"))
+        Utils.runWithOutput(["jar", "uf", apkFile, "classes.dex"])
+
+        dexFile = os.path.join(archPath, app + "-classes2.dex")
+        # if [[ -f "$appdir/$app/$arch/$app-classes2.dex" ]]; then
+        #   mv $appdir/$app/$arch/$app-classes2.dex $appdir/$app/$arch/classes2.dex
+        if os.path.exists(dexFile):
+            shutil.move(dexFile, os.path.join(archPath, "classes2.dex"))
+            Utils.runWithOutput(["jar", "uf", apkFile, "classes2.dex"])
+
+        dexFile = os.path.join(archPath, app + "-classes3.dex")
+        # if [[ -f "$appdir/$app/$arch/$app-classes3.dex" ]]; then
+        #   mv $appdir/$app/$arch/$app-classes3.dex $appdir/$app/$arch/classes3.dex
+        if os.path.exists(dexFile):
+            shutil.move(dexFile, os.path.join(archPath, "classes3.dex"))
+            Utils.runWithOutput(["jar", "uf", apkFile, "classes3.dex"])
+
+        os.chdir(oldDir)
 
     @staticmethod
     def deoatFrwWithArch(frwDir, arch):
@@ -356,30 +388,68 @@ class OatZip:
             dexFile = os.path.join(archPath, app + ".dex")
             if os.path.exists(archPath):
                 if not OatZip.isDeodexed(apkFile):
-                    os.chdir(archPath)
+                    OatZip.packageDexToAppWithArch(apkFile, arch)
 
-                    Log.d(TAG, "Repackage %s" %(apkPath))
-                    #mv $appdir/$app/$arch/$app.dex $appdir/$app/$arch/classes.dex
-                    shutil.move(dexFile, os.path.join(archPath, "classes.dex"))
-                    Utils.runWithOutput(["jar", "uf", apkFile, "classes.dex"])
-
-                    #if [[ -f "$appdir/$app/$arch/$app-classes2.dex" ]]; then
-                    #   mv $appdir/$app/$arch/$app-classes2.dex $appdir/$app/$arch/classes2.dex
-                    if os.path.exists(os.path.join(archPath, app + "-classes2.dex")):
-                        shutil.move(os.path.join(archPath, app + "-classes2.dex"), os.path.join(archPath, "classes2.dex"))
-                        Utils.runWithOutput(["jar", "uf", apkFile, "classes2.dex"])
-
-                    #if [[ -f "$appdir/$app/$arch/$app-classes3.dex" ]]; then
-                    #   mv $appdir/$app/$arch/$app-classes3.dex $appdir/$app/$arch/classes3.dex
-                    if os.path.exists(os.path.join(archPath, app + "-classes3.dex")):
-                        shutil.move(os.path.join(archPath, app + "-classes3.dex"), os.path.join(archPath, "classes3.dex"))
-                        Utils.runWithOutput(["jar", "uf", apkFile, "classes3.dex"])
-
-                os.chdir(oldDir)
                 #rm -rf $appdir/$app/$arch
                 shutil.rmtree(archPath)
 
         os.chdir(oldDir)
+
+    @staticmethod
+    def check_validate(apkFile, arch, arch2):
+        '''check whether is validate apk'''
+        return True
+
+    @staticmethod
+    def dealWithAdditionalApks(systemDir, frwDir, arch, arch2, allAppDirs):
+        ''' deal with additional apks '''
+
+        if OPTIONS.formatApp == False: return
+
+        # Keep the old directory, we will change back after some operations.
+        oldDir = os.path.abspath(os.curdir)
+
+        bootClassFolderArch = os.path.join(frwDir, arch, "odex")
+        bootClassFolderArch2 = os.path.join(frwDir, arch2, "odex")
+
+        for (dirpath, dirnames, filenames) in os.walk(systemDir):
+
+            # Exclude scanned directories
+            if dirpath in allAppDirs:
+                continue
+
+            dirnames = dirnames # no use, to avoid warning
+
+            for filename in filenames:
+                if filename.endswith(".apk"):
+                    apkFile = os.path.join(dirpath, filename)
+                    if not OatZip.check_validate(apkFile, arch, arch2):
+                        continue
+
+                    archDir = os.path.join(dirpath, arch)
+                    #app name
+                    app = filename[0:-4]
+                    if os.path.exists(archDir):
+                        if not OatZip.isDeodexed(apkFile):
+                            odexFile = os.path.join(archDir, app + ".odex")
+                            if os.path.exists(odexFile):
+                                Utils.runWithOutput([OatZip.OAT2DEX, odexFile, bootClassFolderArch])
+
+                                OatZip.packageDexToAppWithArch(apkFile, arch)
+                        #rm -rf $appdir/$app/$arch
+                        shutil.rmtree(archDir)
+
+                    arch2Dir = os.path.join(dirpath, arch2)
+                    if os.path.exists(arch2Dir):
+                        if not OatZip.isDeodexed(apkFile):
+                            odexFile = os.path.join(arch2Dir, app + ".odex")
+                            if os.path.exists(odexFile):
+                                Utils.runWithOutput([OatZip.OAT2DEX, odexFile, bootClassFolderArch2])
+
+                                OatZip.packageDexToAppWithArch(apkFile, arch2)
+                        #rm -rf $appdir/$app/$arch
+                        shutil.rmtree(arch2Dir)
+
 
 
 def debug():
