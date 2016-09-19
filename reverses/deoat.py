@@ -421,7 +421,7 @@ class OatZip:
             dirnames = dirnames # no use, to avoid warning
 
             for filename in filenames:
-                if filename.endswith(".apk"):
+                if filename.endswith(".apk") or filename.endswith(".jar"):
                     apkFile = os.path.join(dirpath, filename)
                     if not OatZip.check_validate(apkFile, arch, arch2):
                         continue
