@@ -42,8 +42,8 @@ function otadiff()
 {
     getsignotapara
     OUT_ZIP=${OUT_ZIP// /_}
-    echo "$OTA_FROM_TARGET --block $SIGN_OTA_PARA -n -k $TEST_KEY -i $PRE_ZIP $POST_ZIP $OUT_ZIP"
-    $OTA_FROM_TARGET --block $SIGN_OTA_PARA -n -k $TEST_KEY -i $PRE_ZIP $POST_ZIP $OUT_ZIP
+    echo "$OTA_FROM_TARGET $SIGN_OTA_PARA -n -k $TEST_KEY -i $PRE_ZIP $POST_ZIP $OUT_ZIP"
+    $OTA_FROM_TARGET $SIGN_OTA_PARA -n -k $TEST_KEY -i $PRE_ZIP $POST_ZIP $OUT_ZIP
     echo ">>> Out ==> $OUT_ZIP"
 }
 
