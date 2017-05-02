@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- code range: 0~255 -->
+
+<items>
+    <item name="SUCCESS" code="00" />
+
+	<item name="tale" code="255">
+		<detail>
+
+		 这是一个很长的故事,我们已经讲了很长一段时间,但我们仍然相信有人会继续。
+
+                                    CORON的故事永远不会停止 .
+
+       ────────────────────────────────────────────────────────────────────────────────────
+
+              MMML          MHHL         "MMMMMMM'           MMML        M
+           IMM*CC*MMM     IMLMHCMMML     MMM*ZJH*MMH      IMMM--CML       ML        H
+         IMMML           MMM     IMMC    $MM     MMM     MMMC    MMML     MMM       H
+         MMM           'MMM       MMMH   $MMI--IHMMM   IMMM'     MMMMH    MMMM      M
+         MMM           MMMM      MMMM$   MMM$MMMMM     MMMM:     MMMM$   IMMM MM    MM
+         MMMMH:     M  HMMMH     MMMM:   MMMM  ?MM     HMMMH     MMMMI   MMMM  MMM  MML
+         IMMM*DQZ*MMM   HMMM  H*ZWP*M    MMMM   MMML    HMMMMM-HMMMM$    MMMM   MMMMMMM
+            HMMMMMMMC      IMMMMMCL     *TLX*  IMMMMM      ICMMMML     IMMMMM      IMMM
+             IMMMHHH        IMIHL      HMMMMM  IMMMMM        IMMH      HMMMMM       MMM
+
+       ────────────────────────────────────────────────────────────────────────────────────
+
+		什么是CORON?
+		  * CORON是一个开源的Android ROM porting项目.
+		  * 利用CORON丰富的工具，开发者可以在最快的时间里为一台设备适配上最新的FlymeOS.
+		  * 在CORON里，所有是课程都是可以利用的，包括视频课程和在线课程.
+
+		为什么要叫CORON?(此处不作翻译)
+		  * CORON stands for CO-operated RON(m), born to be cooperative with ROM developers;
+		  * CORON stands for RON(m) Over Cloud, provides access of huge remote servers' ability;
+		  * CORON is also an island, paradise of divers. It shows simple and tasteful feelings.
+
+		怎样使用CORON?
+		  在初始化CORON环境之后，运行命令'coron'去查看使用方法.
+		  神器的工具会让你无法放得下CORON.
+		  CORON的目录就像这样:
+
+		  coron                        │  # 这是CORON的根目录
+		    ├── manifest               │  # CORON的介绍文件，包括教程的存放地点
+		    │                          │
+		    ├── board                  │  # 所有有关FlymeOS的资源
+		    │     ├── frameworks       │
+		    │     │      └── overlay   │  # Flyme的框架资源存放地点
+		    │     └── release          │  # 已经发布的apk和jar，也叫Flyme底包
+		    │                          │
+		    ├── devices                │  # 所有有关Flyme的参考机型
+		    │     ├── base             │  # 其他所有机型的插桩基础
+		    │     └── yourdevice       │  # 这是你的机型根目录
+		    │                          │
+		    ├── build                  │  # 环境工具
+		    └── tools                  │  # 插桩工具
+
+		 CORON永远为你敞开,希望有一天你会加入我们
+		  * GitHub : https://github.com/flymeos/manifest
+
+		</detail>
+	</item>
+
+	<item name="fire" code="254">
+		<detail>
+		一键适配FlymeOS，所有适配ROM的步骤都会集中在这一步！
+		</detail>
+	</item>
+
+	<item name="help" code="253">
+		<detail>
+		输入 `help [ACTION]` 去获取更多关于[ACTION]的帮助文档.
+		</detail>
+	</item>
+
+	<item name="help_usage" code="252">
+		<detail>
+		Flyme开源项目致力于为开发者提供业界一流的ROM适配工具.
+		</detail>
+	</item>
+
+	<item name="help_license" code="251">
+		<detail>
+		Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
+		</detail>
+	</item>
+
+	<item name="help_cmds" code="250">
+		<detail>
+		提供的命令:
+		</detail>
+	</item>
+
+	<item name="err_code" code="249">
+		<detail>
+		错误号
+		</detail>
+	</item>
+
+	<item name="config" code="10">
+		<detail>
+		为新设备生成一个Makefile，这个Makefile将会包含所有的配置.
+		</detail>
+	</item>
+
+	<item name="newproject" code="20">
+		<detail>
+		为新设备建立一个新项目，只能用在为设备建立新项目上.
+		</detail>
+	</item>
+
+	<item name="patchall" code="30">
+		<detail>
+		应用所有的Flyme的修改(插桩).
+		将AOSP和BOSP产生的修改合并到原厂代码上.
+		 BOSP  : Flyme开源代码
+		 AOSP  : 安卓开源代码
+		 VENDOR: 设备原厂代码
+
+		原厂代码位于你的机型根目录.
+		AOSP和BOSP位于机型根目录的autopatch目录里.
+		</detail>
+	</item>
+
+	<item name="autofix" code="248"><!-- 40 -->
+		<detail>
+		解决冲突.
+		运行patchall之后, reject冲突就会发生, autofix会自动帮你解决冲突.
+		</detail>
+	</item>
+
+	<item name="fullota" code="50">
+		<detail>
+		制作一个完整的刷机包.
+		一个完整的刷机包将会在out目录下生成，你应该把它刷入你的手机.
+		</detail>
+	</item>
+
+	<item name="upgrade" code="60">
+		<detail>
+		应用所有的更新修改，你可以升级你的设备到最新.
+		</detail>
+	</item>
+
+	<item name="porting" code="70">
+		<detail>
+		从现有的设备参考制作FlymeOS.
+		 使用语法： "COMMIT1=xx COMMIT2=xx" 应用修改从COMMIT1到COMMIT2
+		</detail>
+	</item>
+
+	<item name="clean" code="80" >
+	    <detail>
+		清理项目out目录的文件.
+		</detail>
+	</item>
+
+	<item name="cleanall" code="90" >
+		<detail>
+		清理项目不需要的文件，包括机型目录下的board目录和out目录.
+		</detail>
+	</item>
+
+	<!--
+	<item name="reserved" code="100" />
+	<item name="reserved" code="110" />
+	<item name="reserved" code="120" />
+	<item name="reserved" code="130" />
+	<item name="reserved" code="140" />
+	-->
+
+    <item name="NO_CONFLICT" code="31">
+		<solution>
+		     建议:
+		      1. 即使没有冲突(reject)，但是错误有时候还是会出现的,
+		         这取决于你的手机厂商，他们通常都会对AOSP进行很多修改.
+			 
+		      2. 你应该去运行fullota，刷入make出来的包,
+		         然后利用实时日志(log)去分析并修复bug.
+		</solution>
+	</item>
+
+	<item name="CONFLICTS_HAPPENED" code="32">
+		<solution>
+		     建议:
+		      1. 每个冲突(conflict)都会像这样标记出来:
+
+		      &lt;&lt;&lt;&lt;&lt;&lt;&lt; VENDOR
+		        原厂代码
+		      =======
+		        BOSP
+		      &gt;&gt;&gt;&gt;&gt;&gt;&gt; BOSP
+
+		      你最好在解决所有的冲突之前进行如下操作.
+
+		      2. 你可以按照这3个步骤来解决冲突:
+		         - 对比原厂代码和reject冲突来寻找哪里发生冲突;
+		         - 对比autopatch目录下的AOSP和BOSP来寻找Flyme对AOSP作了什么修改;
+		         - 对比原厂代码和BOSP来决定应该怎样去解决冲突.
+		</solution>
+	</item>
+
+	<item name="ERR_USB_NOT_CONNECTED" code="151">
+		<detail>
+		找不到设备
+		</detail>
+		<solution>
+		请确认你的设备已经连接.
+		</solution>
+	</item>
+
+	<item name="ERR_DEVICE_NOT_ROOTED" code="152">
+		<detail>
+		无法获取root权限
+		</detail>
+	</item>
+
+	<item name="ERR_UNPACK_BOOTIMG_FAILED" code="153">
+		<detail>
+		解包镜像失败，boot.img或者recovery.img非常规格式.
+		</detail>
+		<solution>
+                建议解决方案:
+                ----------------
+		使用以下命令来确认镜像是否能被解包:
+		  $ unpack_bootimg recovery.img
+
+		如果解包失败，请使用其他镜像或者上网搜索解包方式.
+		</solution>
+	</item>
+
+	<item name="ERR_PACK_BOOTIMG_FAILED" code="154">
+		<detail>
+		打包镜像失败，boot.img或者recovery.img非常规格式
+		</detail>
+		<solution>
+                建议解决方案:
+                ----------------
+		使用以下命令来确认镜像是否能被打包:
+		  $ pack_bootimg image_out/
+
+		如果打包失败，请重新解包你的boot.img或者recovery.img.
+		</solution>
+	</item>
+
+	<item name="ERR_DEVICE_BASE_NOT_FOUND" code="155">
+		<detail>
+		找不到devices/base!
+		</detail>
+		<solution>
+                建议解决方案:
+                ----------------
+		请确认devices/base存在.
+		如果没有devices/base, 请尝试使用 "repo sync" 去重新同步源码.
+		</solution>
+	</item>
+
+	<item name="ERR_PULL_BOOT_RECOVERY_FAILED" code="156">
+		<detail>
+		无法从手机里拉取 boot.img 和 recovery.img.
+		</detail>
+		<solution>
+		请确保adb正常工作并让你的设备获取root权限!
+		</solution>
+	</item>
+
+	<item name="ERR_WRONG_PARAMETERS" code="157">
+		<detail>
+		命令参数错误....
+		</detail>
+	</item>
+
+	<item name="ERR_AUTOCOM_FAILED" code="158">
+		<detail>
+		未能为android.policy 和 Phone自动补全方法.
+		</detail>
+		<solution>
+		请检查是否有 Phone.apk 在 vendor/system/app 里，还要确认其是否能被反编译.
+			尝试输入 $ apktool d vendor/system/app/Phone.apk
+		如果你没有 Phone.apk, 那么它一定是被某人或者厂商修改了，请找到它并改名为 Phone.apk.
+		如果反编译失败，请删除它，然后继续.
+		</solution>
+	</item>
+
+	<item name="ERR_METHODTOBOSP_FAILED" code="159">
+		<detail>
+		无法把函数方法替换成BOSP的.
+		</detail>
+		<solution>
+		请确认原厂代码和BOSP中都含有这个smali文件!
+		如果函数方法是正确的, 就像这样
+		$ methodtobosp services.jar.out/smali/com/android/server/am/ActivityManagerService.smali 'moveTaskToFront(IILandroid/os/Bundle;)V'
+		</solution>
+	</item>
+
+	<item name="ERR_SMALITOBOSP_FAILED" code="160">
+		<detail>
+		无法把smali文件替换为BOSP的.
+		</detail>
+		<solution>
+		请确认原厂代码和BOSP中都含有这个smali文件!
+		</solution>
+	</item>
+
+	<item name="ERR_SMALITOBOSP_FAILED" code="160">
+		<detail>
+		无法把smali文件替换为BOSP的.
+		</detail>
+		<solution>
+		请确认原厂代码和BOSP中都含有这个smali文件!
+		</solution>
+	</item>
+
+	<item name="ERR_APKTOOL_BUILD_FAILED" code="161">
+		<detail>
+		无法使用apktool回编译这个apk.
+		</detail>
+		<solution>
+		请确认你在反编译这个apk后没有再安装过任何资源框架,
+		你可以使用以下命令重新安装资源框架
+			$ ifdir xxx/system/framework
+		例子:
+		如果你想回编译原厂apk，那么你必须使用以下命令安装原厂的资源框架!
+			$ ifdir out/merged_target_files/SYSTEM/framework/
+		</solution>
+	</item>
+
+	<item name="ERR_APKTOOL_DECODE_FAILED" code="162">
+		<detail>
+		无法反编译这个apk.
+		</detail>
+		<solution>
+		请确认目标文件夹不存在!
+		还有，在反编译之前，你必须先安装资源框架.
+			$ ifdir xxx/system/framework
+		例子:
+		如果你想反编译Flyme的apk，那么你必须先使用以下命令安装Flyme的资源框架!
+			$ ifdir board/system/framework
+		</solution>
+	</item>
+
+	<item name="ERR_DEODEX_FAILED" code="163">
+		<detail>
+		无法在ota.zip/target-files.zip里合并odex.
+		</detail>
+		<solution>
+		如果它无法工作 那么你可以寻找其他合并odex的工具.
+		</solution>
+	</item>
+
+</items>

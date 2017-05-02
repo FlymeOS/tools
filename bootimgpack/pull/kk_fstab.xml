@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<fstab>
+    <array name = "attr">
+        <item>mp</item>
+        <item>block</item>
+        <item>fstype</item>
+        <item>prop</item>
+        <item>stat</item>
+    </array>
+    
+    <block name = "boot">"/boot"</block>
+    <block name = "recovery">"/recovery"</block>
+    <block name = "system">"/system"</block>
+    <block name = "cache">"/cache"</block>
+    <block name = "data">"/data"</block>
+
+</fstab>

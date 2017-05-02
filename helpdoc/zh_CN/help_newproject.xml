@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<items category="newproject">
+	<item name="ERR_NOT_PREPARE_RECOVERY_FSTAB" code="201">
+		<detail>
+		找不到recovery分区表文件 recovery.fstab !
+		</detail>
+		<solution>
+		请准备好一个recovery分区表文件(recovery.fstab)放入当前工程目录!
+		</solution>
+	</item>
+
+	<item name="ERR_NOT_OTA_PACKAGE" code="202">
+		<detail>
+		找不到 ota.zip !
+		</detail>
+		<solution>
+		请准备好一个recovery卡刷包(ota.zip)放在当前工程目录下 !
+		</solution>
+	</item>
+
+	<item name="ERR_OTA_INCOMPATIBLE" code="203">
+		<detail>
+		这不是一个标准格式的卡刷包，不兼容该卡刷包！
+		</detail>
+		<solution>
+		请检查META-INF和system文件夹是否在卡刷包里！
+		</solution>
+	</item>
+
+	<item name="ERR_NOT_OEM_TARGET" code="204">
+		<detail>
+		找不到 out/oem_target_files.zip !
+		</detail>
+		<solution>
+		输入make clean, 并再次执行 !
+		</solution>
+	</item>
+
+	<item name="ERR_MISSION_FAILED" code="209">
+		<detail>
+		任务失败了,抓到一个运行时发生的错误.
+		</detail>
+		<solution>
+		请检查日志!
+		</solution>
+	</item>
+
+	<item name="ERR_NOT_PREPARE_RECOVERY_IMG" code="211">
+		<detail>
+		找不到 recovery.img !
+		</detail>
+		<solution>
+		请准备好一个recovery镜像文件(recovery.img)或者recovery分区表文件(recovery.fstab)放在当前工程目录 !
+		</solution>
+	</item>
+
+	<item name="ERR_NOT_PREPARE_BOOT_IMG" code="212">
+		<detail>
+		找不到 boot.img !
+		</detail>
+		<solution>
+		请准备好一个boot.img内核镜像放在当前工程目录或者不要在Makefile的vendor_modify_images上配置boot !
+		</solution>
+	</item>
+
+</items>

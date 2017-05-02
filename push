@@ -1,0 +1,49 @@
+#!/bin/bash
+# author: tangliuxiang
+
+PERMISSION=""
+if [ "x$1" == "x-p" ]; then
+	PERMISSION=$2
+	shift
+	shift
+fi
+
+function usage()
+{
+	echo "USAGE: push <local> <remote>"
+	echo "			- copy file/dir to device"
+	echo "Just like the usage of adb push"
+}
+
+if [ "$#" -lt 2 ]; then
+	usage
+	exit 1
+fi
+
+progdir=`dirname $0`/su-tools
+
+check-su 2>&1 > /dev/null
+
+if [ $? == 0 ]; then
+	if [ "x$PERMISSION" != "x" ]; then
+		PERMISSION="-p $PERMISSION"
+	fi
+	su-push $PERMISSION $@ || exit $?
+else
+	adb root
+	echo "wait for devices..."
+	adb wait-for-devices
+	adb remount
+	adb wait-for-devices
+	adb push $@  || exit $?
+
+	if [ "x$PERMISSION" != "x" ]; then
+		p_chmod="$progdir/phone-chmod"
+		phone_chmod=/data/local/tmp/phone-chmod
+		adb push $p_chmod $phone_chmod
+		adb shell chmod 777 $phone_chmod
+
+		adb shell $phone_chmod --after-push $1 $PERMISSION $2 || exit $?
+	fi
+	echo ">>> Success pushed $1 to $2"
+fi

@@ -1,0 +1,8 @@
+  |
+  |  >> Advice:                                                                                 
+  |         The reason that these smali's method can not be replace to bosp                            
+  |           probaly because they are constructor methods,                                     
+  |           where the fields which was added by vendor will be initiated!                     
+  |                                                                                             
+  |         You better fix the reject by yourself! There are errors when replace to bosp!
+  |

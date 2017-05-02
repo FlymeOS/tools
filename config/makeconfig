@@ -1,0 +1,409 @@
+#!/bin/bash
+
+##########################################
+#
+# author: coron
+# usage: used to generate Makefile for an coron project
+# date: 2013/11/21
+#
+##########################################
+
+TAG="makeconfig"
+
+WORK_DIR=$PWD
+NEW_MAKEFILE=$WORK_DIR/Makefile
+
+MAKECONFIG_ROOT=$PORT_ROOT/tools/config
+DENSITY_CFG=$MAKECONFIG_ROOT/density.cfg
+TEMPLATE_MAKEFILE=$MAKECONFIG_ROOT/Makefile.template
+VENDOR_MODIFY_JARS_SUGGEST="framework|services|telephony-common|wifi-service|android.policy"
+VENDOR_SAVED_APPS_SUGGEST="MtkBt|FMTransmitter|FMRadio|Bluetooth|FmRadio|.*Stk.*|Nfc"
+
+PULL_BOOT_RECOVERY=pull_boot_recovery
+
+GIT_IGNORE_CONFIG=$MAKECONFIG_ROOT/gitignore.template
+PRJ_GIT_IGNORE=$WORK_DIR/.gitignore
+
+FROM_OTA=0
+OTA_PACKAGE=$WORK_DIR/ota.zip
+OUT=$WORK_DIR/out
+OUT_OTA_DIR=$OUT/ota
+OUT_SYSTEM=$OUT_OTA_DIR/system/
+OUT_METAINF=$OUT_OTA_DIR/META-INF
+
+DENSITY=""
+RESOLUTION=""
+vendor_modify_jars=""
+vendor_saved_apps=""
+
+######## Error Exit Num ##########
+ERR_USB_NOT_CONNECTED=151
+ERR_DEVICE_NOT_ROOTED=152
+
+ERR_MAKEFILE_EXIST=201
+ERR_OTA_INCOMPATIBLE=202
+ERR_MISSION_FAILED=209
+
+################## adb ######################
+
+# check adb can find a device
+function checkAdbConnect()
+{
+	echo ">>> Check connecting state"
+	adb shell ls / > /dev/null 2>&1
+	if [ $? != "0" ];then
+		echo ">>> Device is not found, Please connect device and pc with USB cable, and open Adb Debug in device."
+		exit $ERR_USB_NOT_CONNECTED
+	fi
+}
+
+
+# wait for the device to be online or timeout
+function waitForDeviceOnline ()
+{
+	echo ">>> Wait for the device to be online..."
+
+	local timeout=30
+	while [ $timeout -gt 0 ]
+	do
+		if adb shell ls > /dev/null 2>&1; then
+			echo ">>> device is online"
+			break
+		fi
+		echo ">>> Device is not online, wait .."
+		sleep 3
+		timeout=$[$timeout - 3]
+	done
+	if [ $timeout -eq 0 ];then
+		echo ">>> Device not found, Please ensure adb can find your device and then rerun this script."
+		exit $ERR_USB_NOT_CONNECTED
+	fi
+}
+
+function checkAdbRoot()
+{
+	echo ">>> Check adb root state"
+	SECURE_PROP=$(adb shell cat /default.prop | grep -o "ro.secure=\w")
+	DEBUG_PROP=$(adb shell cat /default.prop | grep -o "ro.debuggable=\w")
+	if [ "$SECURE_PROP" = "ro.secure=0" -o "$DEBUG_PROP" = "ro.debuggable=1" ];then
+		echo ">>> Kernel root ready, run adb root"
+		adb root
+		waitForDeviceOnline
+		return 0
+	fi
+	return 1
+}
+
+function checkSuRoot()
+{
+	echo "exit" > exit_command
+	waitForDeviceOnline
+	adb push exit_command /data/local/tmp/
+	rm -f exit_command
+	if echo "su < /data/local/tmp/exit_command; exit" | adb shell | grep "not found" > /dev/null 2>&1;then
+		return 1
+	fi
+	return 0
+}
+
+# check device connecting state and adb root state
+function checkRootState()
+{
+	checkAdbConnect
+	checkAdbRoot
+	if [ $? == "0" ];then
+		echo ">>> Root State: Kernal Root"
+		return 0
+	fi
+	checkSuRoot
+	if [ $? == "0" ];then
+		echo ">>> Root State: System Root"
+		return 0
+	fi
+	echo ">>> Device is not a root phone."
+	exit $ERR_DEVICE_NOT_ROOTED
+}
+
+############# set up makefile ################
+
+function checkEnvironment()
+{
+	if [ -f $NEW_MAKEFILE ];then
+		echo ">>> $NEW_MAKEFILE already exist!"
+		exit $ERR_MAKEFILE_EXIST
+	fi
+
+	if [ ! -f $TEMPLATE_MAKEFILE ];then
+		echo ">>> $TEMPLATE_MAKEFILE doesn't exist! "
+		echo ">>> Make sure you do source ./build/envsetup first!"
+		exit $ERR_MISSION_FAILED
+	fi
+
+	adb shell ls / > /dev/null 2>&1
+	if [ $? != 0 -a -f $OTA_PACKAGE ];then
+		echo ">>> Device is not online, but ota.zip is exist."
+		echo ">>> Config Makefile from $OTA_PACKAGE."
+		FROM_OTA=1
+	fi
+}
+
+function checkOTAPackage()
+{
+	echo ">>> Unzip $OTA_PACKAGE ..."
+	mkdir -p $OUT
+	rm -rf $OUT_OTA_DIR
+	unzip -q $OTA_PACKAGE -d $OUT_OTA_DIR
+	if [ ! -e $OUT_SYSTEM -o ! -e $OUT_METAINF ];then
+		echo ">>> Can not find $OUT_SYSTEM or $OUT_METAINF."
+		echo ">>> Check whether $OTA_PACKAGE is a ota package."
+		exit $ERR_OTA_INCOMPATIBLE
+	fi
+	if [ -f $OUT_OTA_DIR/boot.img ];then
+		cp $OUT_OTA_DIR/boot.img $WORK_DIR/boot.img
+	fi
+	if [ -f $OUT_OTA_DIR/recovery.img ];then
+		cp $OUT_OTA_DIR/recovery.img $WORK_DIR/recovery.img
+	fi
+}
+
+function checkMtkPlatform()
+{
+	if [ $FROM_OTA != 0 ];then
+		if [ `cat $OUT_SYSTEM/build.prop | grep "mediatek" | wc -l` -gt 0 ]; then
+			MTK_PLATFORM=true
+		else
+			MTK_PLATFORM=false
+		fi
+	else
+		if [ `adb shell cat /system/build.prop | grep "mediatek" | wc -l` -gt 0 ]; then
+			MTK_PLATFORM=true
+		else
+			MTK_PLATFORM=false
+		fi
+	fi
+	echo ">>> Check MTK Platform: $MTK_PLATFORM"
+}
+
+function getResolution()
+{
+	if [ $FROM_OTA != 0 ];then
+		echo ">>> Set Resolution as default"
+		RESOLUTION="720x1280"
+		return 0
+	fi
+	RESOLUTION=$(adb shell wm size \
+		| awk 'BEGIN{FS=": "}{print $NF}')
+}
+
+function getDensity()
+{
+	if [ $FROM_OTA != 0 ];then
+		echo ">>> Set Density as default"
+		DENSITY="xhdpi"
+		return 0
+	fi
+	lcd_density=$(adb shell getprop \
+		| grep "ro.sf.lcd_density" \
+		| awk 'BEGIN{FS="["}{print $NF}' \
+		| awk 'BEGIN{FS="]"}{print $1}')
+
+	if [ $? == "0" ] && [ "x$lcd_density" != "x" ];then
+		density=$(grep "$lcd_density" $DENSITY_CFG | cut -d ':' -f2)
+		if [ $? == "0" ] && [ "x$density" != "x" ];then
+			DENSITY=$density
+		fi
+	fi
+}
+
+function getVendorModifyJars()
+{
+	frameworkListFile=$(mktemp -t -u frameworkList.XXXX)
+
+	if [ $FROM_OTA == 0 ];then
+		adb shell "if [ -f /data/local/tmp/framework-list ]; then rm /data/local/tmp/framework-list; fi"
+		adb shell "ls /system/framework/ > /data/local/tmp/framework-list"
+		adb pull /data/local/tmp/framework-list $frameworkListFile > /dev/null 2>&1
+	else
+		ls $OUT_SYSTEM/framework > $frameworkListFile
+	fi
+	if [ -e $frameworkListFile ]; then
+		vendor_modify_jars=$(grep "\.jar" $frameworkListFile \
+			| sed "s/\.jar//g" \
+			| egrep $VENDOR_MODIFY_JARS_SUGGEST \
+			| sed ":a;N;s/\n/ /g;ba")
+		rm $frameworkListFile
+	else
+		return 1
+	fi
+}
+
+function getConfigValueFromMakefile()
+{
+	local makefile=$1
+	local prop=$2
+	local result_line_count
+	local base
+
+	if [ ! -f $makefile ];then
+		echo ">>> $makefile doesn't exist!!";
+		return 1
+	fi
+
+	# get the base rom type of project
+	# if you doesn't config BOARD_BASE_DEVICE_PROP_NAME in project's makefile, just ignore this project
+	# if you config more than one BOARD_BASE_DEVICE_PROP_NAME in project's makefile, exit with error
+	result_line_count=`grep "^[ ]*$prop" $makefile -w | wc | awk '{print $1}'`
+	if [ $result_line_count = "0" ];then
+		echo ">>> $makefile's $prop does't config!!";
+		return 1
+	elif [ $result_line_count != "1" ];then
+		echo ">>> $makefile's $prop define is wrong!!";
+		exit $ERR_MISSION_FAILED;
+	else # $result_line_count == "1"
+		base=`grep "^[ ]*$prop" $makefile -w \
+			| awk -F= '{print $NF}' | sed 's/^ *//g;s/$ *//g'`
+
+		if [ $? != "0" ] || [ "x$base" = "x" ];then
+			echo ">>> Can't get base from $makefile"
+			echo ">>> Make sure \"$prop\" in $makefile is right"
+			return 1;
+		fi
+
+		echo "$base"
+		return 0
+	fi
+}
+
+function getvendorSavedApps()
+{
+	appListFile=$(mktemp -t -u appList.XXXX)
+
+	if [ $FROM_OTA == 0 ];then
+		adb shell "if [ -f /data/local/tmp/app-list ]; then rm /data/local/tmp/app-list; fi"
+		adb shell "ls /system/app/ > /data/local/tmp/app-list"
+		adb shell "ls /system/priv-app/ >> /data/local/tmp/app-list"
+		adb pull /data/local/tmp/app-list $appListFile > /dev/null 2>&1
+	else
+		ls $OUT_SYSTEM/app/ > $appListFile
+		ls $OUT_SYSTEM/priv-app/ >> $appListFile
+	fi
+
+	vendor_saved_apps_configed=$(getConfigValueFromMakefile $NEW_MAKEFILE "vendor_saved_apps")
+
+	if [ $? == "0" ] && [ "x$vendor_saved_apps_configed" != "x" ];then
+		vendor_saved_apps_configed=$(echo $vendor_saved_apps_configed \
+			| sed 's/^[ \t]*//g' \
+			| sed 's/[ \t]*$//g' \
+			| sed 's/[ \t][ \t]*/ /g' \
+			| sed 's/ /\|/g')
+
+		vendor_saved_apps_suggest=$VENDOR_SAVED_APPS_SUGGEST
+		if [ "x$vendor_saved_apps_configed" != "x" ];then
+			vendor_saved_apps_suggest="$vendor_saved_apps_suggest|$vendor_saved_apps_configed"
+		fi;
+
+		if [ -e $appListFile ]; then
+			vendor_saved_apps=$(cat $appListFile \
+				| egrep $vendor_saved_apps_suggest \
+				| sed ":a;N;s/\n/ /g;ba")
+			rm $appListFile
+		else
+			return 1
+		fi
+	fi
+}
+
+function setupMakefile()
+{
+	echo ">>> Setup the Makefile Begin!"
+
+	cp $TEMPLATE_MAKEFILE $NEW_MAKEFILE
+
+	getVendorModifyJars
+	if [ $? == "0" ] && [ "x$vendor_modify_jars" != "x" ]; then
+		echo ">>> Set vendor_modify_jars: $vendor_modify_jars"
+		sed -i "s/^[ \t]*vendor_modify_jars[ \t]*\:.*/vendor_modify_jars \:\= $vendor_modify_jars/g" $NEW_MAKEFILE
+	else
+		echo ">>> Get the files list in /system/framework failed! "
+		echo ">>> Please check the adb is ok! "
+		exit $ERR_MISSION_FAILED
+	fi
+
+	getDensity
+	if [ "x$DENSITY" != "x" ]; then
+		echo ">>> Set DENSITY: $DENSITY"
+		sed -i "s/^[ \t]*DENSITY[ \t]*\:.*/DENSITY \:\= $DENSITY/g" $NEW_MAKEFILE
+	fi
+
+	getResolution
+	if [ "x$RESOLUTION" != "x" ];then
+		echo ">>> Set RESOLUTION: $RESOLUTION"
+		sed -i "s/^[ \t]*RESOLUTION[ \t]*\:.*/RESOLUTION \:\= $RESOLUTION/g" $NEW_MAKEFILE
+	fi
+
+	getvendorSavedApps
+	if [ "x$vendor_saved_apps" != "x" ]; then
+		echo ">>> Set vendor_saved_apps: $vendor_saved_apps"
+		sed -i "s/^[ \t]*vendor_saved_apps[ \t]*\:.*/vendor_saved_apps \:\= $vendor_saved_apps/g" $NEW_MAKEFILE
+	fi
+
+	echo "===================================================="
+	echo "Makefile Configuration:"
+	echo "    vendor_modify_jars := $vendor_modify_jars"
+	echo "    vendor_saved_apps  := $vendor_saved_apps"
+	echo "    DENSITY            := $DENSITY"
+	echo "    RESOLUTION         := $RESOLUTION"
+	echo "===================================================="
+
+	echo ">>> Setup the Makefile Done!"
+}
+
+############ init gitignore ###########
+function initGitIgnore()
+{
+    if [ -f $GIT_IGNORE_CONFIG ] && [ ! -f $PRJ_GIT_IGNORE ]; then
+        cp $GIT_IGNORE_CONFIG $PRJ_GIT_IGNORE
+    fi
+}
+
+############ pull boot and recovery ###########
+function prepare_boot_recovery()
+{
+	if [ ! -f $WORK_DIR/recovery.img ] && [ ! -f $WORK_DIR/recovery.fstab ]; then
+		pullTmp=`mktemp -d`
+		echo "Pull boot and recovery, It may take a few minutes, please wait...."
+		$PULL_BOOT_RECOVERY $pullTmp > /dev/null 2>&1
+		if [ -f $pullTmp/recovery.img ]; then
+			mv $pullTmp/recovery.img $WORK_DIR/recovery.img
+		fi
+		if [ -f $pullTmp/boot.img ] && [ ! -f $WORK_DIR/boot.img ] ; then
+			mv $pullTmp/boot.img $WORK_DIR/boot.img
+		fi
+		rm -rf $pullTmp
+	fi
+}
+
+############  make new project ###############
+
+# start a new project
+function newMakefile()
+{
+	checkRootState
+	setupMakefile
+	prepare_boot_recovery
+	initGitIgnore
+}
+
+function newMakefileFromOTA()
+{
+	checkOTAPackage
+	setupMakefile
+	initGitIgnore
+}
+
+checkEnvironment
+if [ $FROM_OTA == 0 ];then
+	newMakefile
+else
+	newMakefileFromOTA
+fi

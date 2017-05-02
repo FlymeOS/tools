@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- "seq" identify the sequence of unpack trying -->
+<toolkit>
+    <tool seq="6" type="COMMON" description="Support boot.img of Android 2.3 ~ Android 4.2">
+        <unpack>common/unpack.sh</unpack>
+        <pack>common/pack.sh</pack>
+    </tool>
+    <tool seq="5" type="COMMON-V1" description="Support boot.img of Android 4.3+">
+        <unpack>common-v1/unpack.sh</unpack>
+        <pack>common-v1/pack.sh</pack>
+    </tool>
+    <tool seq="4" type="QCOM" description="Support boot.img of QCOM 4.3+, especially for dt.img of QCOM">
+        <unpack>qcom/unpack.sh</unpack>
+        <pack>qcom/pack.sh</pack>
+    </tool>
+    <tool seq="3" type="MTK" description="Support boot.img of MTK 2.3~4.2">
+        <unpack>mtk/unpack.sh</unpack>
+        <pack>mtk/pack.sh</pack>
+    </tool>
+    <tool seq="2" type="MTK-V1" description="Support boot.img of MTK6752, MTK6732, MTK6595">
+        <unpack>mtk-v1/unpack.sh</unpack>
+        <pack>mtk-v1/pack.sh</pack>
+    </tool>
+    <tool seq="1" type="SONY" description="Support boot.img of SONY 4.2+">
+        <unpack>sony/unpack.sh</unpack>
+        <pack>sony/pack.sh</pack>
+    </tool>
+</toolkit>

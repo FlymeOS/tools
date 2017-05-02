@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<items category="fullota">
+	<item name="ERR_OTA_FROM_TARGET_FILES" code="51">
+		<detail>
+		Failed to run ota_from_target_files to generate an ota zip from target-files.zip
+		</detail>
+	</item>	
+	
+	<item name="ERR_IMG_FROM_TARGET_FILES" code="52">
+		<detail>
+		Failed to generate the system.img from target-files.zip.
+		</detail>
+	</item>	
+
+</items>

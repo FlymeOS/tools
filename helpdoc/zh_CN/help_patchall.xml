@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- code
+000~099: error number
+100~199: command instruduce
+200~255: funny
+-->
+
+<items category="patchall">
+
+</items>

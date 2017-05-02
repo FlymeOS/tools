@@ -1,0 +1,131 @@
+#!/bin/bash
+
+REMOVE_PRE_ZIP=false
+BOARD_META=$PORT_ROOT/board/release/META
+OTA_FROM_TARGET=$PORT_BUILD/tools/releasetools/ota_from_target_files
+TEST_KEY=$PORT_BUILD/security/testkey
+OUT_DIR=out
+
+function getsignotapara()
+{
+    unzip -j -o $POST_ZIP META/misc_info.txt -d $OUT_DIR > /dev/null 2>&1
+    if [ $? == 0 -a -f $OUT_DIR/misc_info.txt ];then
+        if [ $(cat $OUT_DIR/misc_info.txt | grep "not_sign_ota=true" | wc -l) = 1 ];then
+#            SIGN_OTA_PARA=--no_sign
+            echo ">>> Won't sign Incremental OTA Package."
+            return 0
+        fi
+        rm -f $OUT_DIR/misc_info.txt
+    fi
+    SIGN_OTA_PARA=""
+    return 1
+}
+
+function getversionnum()
+{
+    target_file=$1
+    version=""
+    name=""
+    unzip -j -o $target_file SYSTEM/build.prop -d $OUT_DIR > /dev/null 2>&1
+    if [ $? == 0 -a -f $OUT_DIR/build.prop ];then
+        if [ $(cat $OUT_DIR/build.prop | grep "ro.build.display.id" | wc -l) == 1 ];then
+            version=$(cat $OUT_DIR/build.prop | grep "ro.build.display.id" | awk -F= '{print $2}')
+        fi
+        if [ $(cat $OUT_DIR/build.prop | grep "ro.product.name" | wc -l) == 1 ];then
+            name=$(cat $OUT_DIR/build.prop | grep "ro.product.name" | awk -F= '{print $2}')
+        fi
+        rm -f $OUT_DIR/build.prop
+    fi
+    if [ x"$version" = x"" ];then
+        version=$(basename $target_file)
+        version=${version%%.zip*}
+    fi
+}
+
+function otadiff()
+{
+    getsignotapara
+    OUT_ZIP=${OUT_ZIP// /_}
+    echo "$OTA_FROM_TARGET $SIGN_OTA_PARA -n -k $TEST_KEY -i $PRE_ZIP $POST_ZIP $OUT_ZIP"
+    $OTA_FROM_TARGET $SIGN_OTA_PARA -n -k $TEST_KEY -i $PRE_ZIP $POST_ZIP $OUT_ZIP
+    echo ">>> Out ==> $OUT_ZIP"
+}
+
+function ota2target()
+{
+    unzip -t $PRE_ZIP SYSTEM/build.prop > /dev/null 2>&1
+    if [ $? == 0 ];then
+        return 0
+    fi
+
+    echo ">>> create a target package from ota package ..."
+    preTmpDir=`mktemp -dt pre.target.XXXX`
+    unzip -q -o $PRE_ZIP -d $preTmpDir
+
+    if [ -d $preTmpDir/system ]; then
+        mv $preTmpDir/system $preTmpDir/SYSTEM
+        ls $preTmpDir/*.img
+        if [ $? == 0 ]; then
+            mkdir $preTmpDir/BOOTABLE_IMAGES
+            mv $preTmpDir/*.img $preTmpDir/BOOTABLE_IMAGES
+        fi
+
+        postTmpDir=`mktemp -dt post.target.XXXX`
+        unzip -q -o $POST_ZIP -d $postTmpDir
+
+        if [ -d $postTmpDir/META ]; then
+            cp -rf $postTmpDir/META $preTmpDir
+        else
+            cp -rf $BOARD_META $preTmpDir
+        fi
+
+        newTarget=`mktemp -tu new.target.XXXX.zip`
+        cd $preTmpDir
+        zip $newTarget * -rqy
+        cd -
+
+        PRE_ZIP=$newTarget
+        REMOVE_PRE_ZIP=true
+
+        rm -rf $postTmpDir
+    fi
+    #echo "preTmpDir: $preTmpDir"
+    rm -rf $preTmpDir
+}
+
+function getotadiffname()
+{
+    if [ x"$OUT_ZIP" == x"" ]; then
+        getversionnum $PRE_ZIP
+        pre_version=$version
+        getversionnum $POST_ZIP
+        post_version=$version
+        OUT_ZIP=$OUT_DIR/ota-diff-$name-$pre_version-$post_version.zip
+        echo ">>> Create ota package name: $OUT_ZIP"
+    fi
+}
+
+function main()
+{
+    ota2target
+    getotadiffname
+    otadiff $PRE_ZIP $POST_ZIP $OUT_ZIP
+
+    if [ $REMOVE_PRE_ZIP == true ]; then
+        rm $PRE_ZIP
+    fi
+}
+
+if [ $# -lt 2 ]; then
+    echo "Usage: otadiff pre-target-files.zip/ota.zip target-files.zip [ota-diff.zip]"
+    echo "       pre-target-files.zip: the previous target files or ota.zip"
+    echo "       target-files.zip: the current target files"
+    echo "       [ota-diff.zip]: the ota update zip"
+    exit 1
+fi
+
+PRE_ZIP=$1
+POST_ZIP=$2
+OUT_ZIP=$3
+
+main

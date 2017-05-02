@@ -1,0 +1,67 @@
+#!/bin/bash
+# author: tangliuxiang
+
+function usage()
+{
+	echo "USAGE: su-chmod [OPTION] MODE FILE"
+	echo "       -R, --recursive"
+    echo "               change files and directories recursively"
+}
+
+prog="$0"
+while [ -h "${prog}" ]; do
+    newProg=`/bin/ls -ld "${prog}"`
+    #echo ${newProg}
+
+    newProg=`expr "${newProg}" : ".* -> \(.*\)$"`
+    if expr "x${newProg}" : 'x/' >/dev/null; then
+        prog="${newProg}"
+    else
+        progdir=`dirname "${prog}"`
+        prog="${progdir}/${newProg}"
+    fi
+done
+oldwd=`pwd`
+progdir=`dirname "${prog}"`
+cd "${progdir}"
+progdir=`pwd`
+prog="${progdir}"/`basename "${prog}"`
+cd "${oldwd}"
+
+if [ $# -lt 2 ]; then
+	usage
+	exit 1
+fi
+
+pushed_file=""
+if [ "x$1" == "x--after-push" ] || [ "x$1" == "x-a" ]; then
+	pushed_file="--after-push $2"
+	shift
+	shift
+fi
+
+RECURSIVE=""
+if [ "x$1" == "x--recursive" ] || [ "x$1" == "x-R" ]; then
+	RECURSIVE="-R"
+	shift
+fi
+
+permission=$1
+target=$2
+p_chmod="$progdir/phone-chmod"
+phone_chmod=/data/local/tmp/phone-chmod
+
+adb push $p_chmod $phone_chmod
+adb shell chmod 777 $phone_chmod
+
+chmod_cmd="$phone_chmod $pushed_file $RECURSIVE $permission $target"
+
+if [[ $target == "/system/"* ]] || [[ $target == "system/"* ]];then
+	#echo "su -c \"mount -o remount,rw /system; $chmod_cmd ;mount -o remount,ro /system\"; exit $?" | adb shell
+	adb shell su -c mount -o remount,rw /system;
+	adb shell su -c $chmod_cmd
+#	adb shell su -c mount -o remount,ro /system
+else
+	#echo "su -c \"$chmod_cmd; \"; exit $?" | adb shell
+	adb shell su -c $chmod_cmd;
+fi

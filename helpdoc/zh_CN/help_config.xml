@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<items category="config">
+
+	<item name="ERR_NOT_FOUND" code="127">
+		<detail>
+		未能进行: makeconfig, 找不到命令
+		</detail>
+		<solution>
+		1. 请确认你是否运行了环境安装命令:
+		 $ source build/envsetup.sh
+
+		2. 请确保makeconfig文件必须是可执行的:
+		 $ ls -l build/tools/makeconfig
+
+		你可以这样让makeconfig变成可执行文件:
+		 $ chmod a+x build/tools/makeconfig
+
+                 你应该使用git clone下载tools目录.
+		</solution>
+	</item>
+
+	<item name="ERR_MAKEFILE_EXIST" code="201">
+		<detail>
+		Makefile已经存在! 确认已经配置好你的设备?
+		</detail>
+		<solution>
+		如果你想重新配置Makefile，请把Makefile文件删除并再次执行.
+		</solution>
+	</item>
+
+	<item name="ERR_OTA_INCOMPATIBLE" code="202">
+		<detail>
+		这不是一个标准格式的卡刷包，不兼容该卡刷包！
+		</detail>
+		<solution>
+		请检查META-INF和system文件夹是否在卡刷包里！
+		</solution>
+	</item>
+	
+	<item name="ERR_MISSION_FAILED" code="209">
+		<detail>
+		任务失败了,抓到一个运行时发生的错误.
+		</detail>
+		<solution>
+		请检查日志!
+		</solution>
+	</item>
+
+</items>
