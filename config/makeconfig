@@ -284,6 +284,8 @@ function getVendorModifyJars()
 			extract_recovery_fstab
 			dump_bootimage
 		fi
+		adb shell "if [ -f /data/local/tmp ]; then rm /data/local/tmp; fi"
+		adb shell "mkdir -p /data/local/tmp"
 		adb shell "if [ -f /data/local/tmp/framework-list ]; then rm /data/local/tmp/framework-list; fi"
 		adb shell "ls /system/framework/ > /data/local/tmp/framework-list"
 		adb pull /data/local/tmp/framework-list $frameworkListFile > /dev/null 2>&1
