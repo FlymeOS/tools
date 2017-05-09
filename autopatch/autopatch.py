@@ -176,6 +176,10 @@ class ReviseExecutor:
 
     @staticmethod
     def bakupTarget(target, dst):
+
+        # Find out the actual target
+        target = ReviseExecutor.TARGET_FINDER.find(target)
+
         if not os.path.exists(target):
             return
 

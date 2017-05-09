@@ -296,6 +296,9 @@ class OatZip:
         archDir = os.path.join(frwDir, arch)
         odexDir = os.path.join(archDir, "odex")
         oatDir = os.path.join(frwDir, "oat", arch)
+
+        if not os.path.exists(oatDir): return
+
         for item in os.listdir(oatDir):
             if item.endswith(".odex"):
                 jarFile = os.path.join(frwDir, item[0:-5] + ".jar")

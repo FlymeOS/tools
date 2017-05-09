@@ -227,6 +227,8 @@ class ZipModel:
             if match is not None:
                 libType = match.group("lib")
                 Log.d(TAG, "sys.dalvik.vm.lib=%s" % libType)
+            else:
+                libType = ""
 
             fileHandle.close()
         else:
