@@ -1,6 +1,14 @@
 [English](./CHANGELOG.md) | 简体中文
 
 
+#### Flyme 6.7.6.9 (2017-06-13)
+
+- 【优化】更新 `smali.jar` 到版本 `v2.1.3`。
+- 【优化】更新 `baksmali.jar` 到版本 `v2.1.3`。
+- 【优化】更新 `apktool.jar` 到版本 `v2.2.2`。
+- 【优化】更新 `aapt`， 取自于 `apktool.jar`。
+
+
 #### Flyme 6.7.5.15 (2017-05-16)
 
 - 【新增】支持在 `sepolicy` 中注入新的权限规则。根据机型的需要，可以在机型目录使用 `custom_sepolicy` 脚本自行定制需要注入的权限规则。根据机型的需要，可以在 `Makefile` 文件中自行配置是否注入 `sepolicy` 新的权限规则。
