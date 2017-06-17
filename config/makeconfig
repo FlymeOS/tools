@@ -13,6 +13,7 @@ TAG="makeconfig"
 WORK_DIR=$PWD
 NEW_MAKEFILE=$WORK_DIR/Makefile
 
+DAT_PACKING_TOOL=$PORT_ROOT/build/tools/releasetools/sdat2img.py
 MAKECONFIG_ROOT=$PORT_ROOT/tools/config
 DENSITY_CFG=$MAKECONFIG_ROOT/density.cfg
 TEMPLATE_MAKEFILE=$MAKECONFIG_ROOT/Makefile.template
@@ -25,7 +26,10 @@ GIT_IGNORE_CONFIG=$MAKECONFIG_ROOT/gitignore.template
 PRJ_GIT_IGNORE=$WORK_DIR/.gitignore
 
 FROM_OTA=0
+FROM_DAT=0
 OTA_PACKAGE=$WORK_DIR/ota.zip
+ROM_PACKAGE=$WORK_DIR/rom.zip
+DAT_PACKAGE=$WORK_DIR/system.new.dat
 OUT=$WORK_DIR/out
 OUT_OTA_DIR=$OUT/ota
 OUT_SYSTEM=$OUT_OTA_DIR/system/
@@ -36,6 +40,7 @@ RESOLUTION=""
 vendor_modify_jars=""
 vendor_saved_apps=""
 
+FROM_RECOVERY=0
 ######## Error Exit Num ##########
 ERR_USB_NOT_CONNECTED=151
 ERR_DEVICE_NOT_ROOTED=152
@@ -57,6 +62,13 @@ function checkAdbConnect()
 	fi
 }
 
+function checkRecovery {
+    if adb devices | grep -i "recovery" > /dev/null; then
+        FROM_RECOVERY=1
+    else
+        FROM_RECOVERY=0 
+    fi
+}
 
 # wait for the device to be online or timeout
 function waitForDeviceOnline ()
@@ -139,11 +151,35 @@ function checkEnvironment()
 		exit $ERR_MISSION_FAILED
 	fi
 
-	adb shell ls / > /dev/null 2>&1
-	if [ $? != 0 -a -f $OTA_PACKAGE ];then
+	if [ -f $OTA_PACKAGE ];then
 		echo ">>> Device is not online, but ota.zip is exist."
 		echo ">>> Config Makefile from $OTA_PACKAGE."
 		FROM_OTA=1
+	fi
+
+	if [ -f $ROM_PACKAGE ];then
+		echo ">>> Device is not online, but system.new.dat is exist."
+		echo ">>> Config Makefile from $ROM_PACKAGE."
+		FROM_DAT=1
+	fi
+}
+
+function checkDATPackage()
+{
+	echo ">>> Unzip $ROM_PACKAGE ..."
+	mkdir -p $OUT tmp
+	rm -rf $OUT_OTA_DIR
+	unzip -q $ROM_PACKAGE -d $OUT_OTA_DIR
+	python $DAT_PACKING_TOOL $OUT_OTA_DIR/system.transfer.list $OUT_OTA_DIR/system.new.dat system.img &> /dev/null
+        sudo mount -t ext4 -o loop system.img tmp/
+	sudo chown -R nian:nian tmp
+	mkdir -p $OUT_SYSTEM
+        cp -rf tmp/* $OUT_SYSTEM
+	if [ -f $OUT_OTA_DIR/boot.img ];then
+		cp $OUT_OTA_DIR/boot.img $WORK_DIR/boot.img
+	fi
+	if [ -f $OUT_OTA_DIR/recovery.img ];then
+		cp $OUT_OTA_DIR/recovery.img $WORK_DIR/recovery.img
 	fi
 }
 
@@ -168,7 +204,7 @@ function checkOTAPackage()
 
 function checkMtkPlatform()
 {
-	if [ $FROM_OTA != 0 ];then
+	if [ $FROM_OTA != 0 ]||[ $FROM_DAT != 0 ];then
 		if [ `cat $OUT_SYSTEM/build.prop | grep "mediatek" | wc -l` -gt 0 ]; then
 			MTK_PLATFORM=true
 		else
@@ -186,7 +222,7 @@ function checkMtkPlatform()
 
 function getResolution()
 {
-	if [ $FROM_OTA != 0 ];then
+	if [ $FROM_OTA != 0 ]||[ $FROM_DAT != 0 ];then
 		echo ">>> Set Resolution as default"
 		RESOLUTION="720x1280"
 		return 0
@@ -197,7 +233,7 @@ function getResolution()
 
 function getDensity()
 {
-	if [ $FROM_OTA != 0 ];then
+	if [ $FROM_OTA != 0 ]||[ $FROM_DAT != 0 ];then
 		echo ">>> Set Density as default"
 		DENSITY="xhdpi"
 		return 0
@@ -215,11 +251,41 @@ function getDensity()
 	fi
 }
 
+# In recovery mode, extract the recovery.fstab from device
+function extract_recovery_fstab {
+if [ ! -f $WORK_DIR/recovery.fstab ];then
+    adb shell cat /etc/recovery.fstab | awk '{print $1 "\t" $2 "\t" $3}'> $WORK_DIR/recovery.fstab
+fi
+}
+
+# In recovery mode, dump the boot image from device
+function dump_bootimage {
+if [ ! -f $WORK_DIR/boot.img ];then
+        local info=`adb shell cat /etc/recovery.fstab | grep boot | sed -e "s/\s\+/:/g"`
+        local fstype=`echo $info | cut -d":" -f2`
+
+        if [ "$fstype" == "mtd" ]; then
+            mtdn=`adb shell cat /proc/mtd | grep boot | cut -f1 -d":"`
+            device=/dev/$fstype/$mtdn
+        else
+            device=`echo $info | cut -d":" -f3`
+        fi
+        adb pull $device $WORK_DIR/boot.img
+fi
+}
+
 function getVendorModifyJars()
 {
 	frameworkListFile=$(mktemp -t -u frameworkList.XXXX)
 
-	if [ $FROM_OTA == 0 ];then
+	if [ $FROM_OTA == 0 ]&&[ $FROM_DAT == 0 ];then
+		if [ $FROM_RECOVERY == 1 ];then
+			adb shell mount /system
+			extract_recovery_fstab
+			dump_bootimage
+		fi
+		adb shell "if [ -f /data/local/tmp ]; then rm /data/local/tmp; fi"
+		adb shell "mkdir -p /data/local/tmp"
 		adb shell "if [ -f /data/local/tmp/framework-list ]; then rm /data/local/tmp/framework-list; fi"
 		adb shell "ls /system/framework/ > /data/local/tmp/framework-list"
 		adb pull /data/local/tmp/framework-list $frameworkListFile > /dev/null 2>&1
@@ -278,7 +344,7 @@ function getvendorSavedApps()
 {
 	appListFile=$(mktemp -t -u appList.XXXX)
 
-	if [ $FROM_OTA == 0 ];then
+	if [ $FROM_OTA == 0 ]&&[ $FROM_DAT == 0 ];then
 		adb shell "if [ -f /data/local/tmp/app-list ]; then rm /data/local/tmp/app-list; fi"
 		adb shell "ls /system/app/ > /data/local/tmp/app-list"
 		adb shell "ls /system/priv-app/ >> /data/local/tmp/app-list"
@@ -358,6 +424,12 @@ function setupMakefile()
 	echo ">>> Setup the Makefile Done!"
 }
 
+function umountDATPackage()
+{
+	sudo umount tmp
+	rm -rf tmp
+}
+
 ############ init gitignore ###########
 function initGitIgnore()
 {
@@ -388,6 +460,7 @@ function prepare_boot_recovery()
 # start a new project
 function newMakefile()
 {
+	checkRecovery
 	checkRootState
 	setupMakefile
 	prepare_boot_recovery
@@ -401,9 +474,19 @@ function newMakefileFromOTA()
 	initGitIgnore
 }
 
+function newMakefileFromDAT()
+{
+	checkDATPackage
+	setupMakefile
+	initGitIgnore
+	umountDATPackage
+}
+
 checkEnvironment
-if [ $FROM_OTA == 0 ];then
-	newMakefile
-else
+if [ $FROM_OTA == 1 ];then
 	newMakefileFromOTA
+elif [ $FROM_DAT == 1 ];then
+	newMakefileFromDAT
+else
+	newMakefile
 fi
