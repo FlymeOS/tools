@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+
+old_pwd=`pwd`
+basepath=`cd $(dirname $0); pwd`
+cd $old_pwd
+
+LZ4=$basepath/lz4
+initrd=${1:-initrd.img}
+ramdisk=${2:-RAMDISK}
+
+if [ ! -f $initrd ]; then
+    echo "$initrd does not exist."
+    exit 1
+fi
+
+if [ -d $ramdisk ]; then
+    rm $ramdisk -rf
+fi
+
+echo $initrd
+
+mkdir -p $ramdisk
+cd $ramdisk
+$LZ4 -d ../$initrd | cpio -i
+cd - > /dev/null
+

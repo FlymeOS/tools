@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Element Definition -->
+    <xs:element name="features" type="FeaturesType" />
+    <xs:element name="feature" type="FeatureType" />
+    <xs:element name="revise" type="ReviseType" />
+
+    <!-- Attribute Definition -->
+    <xs:attribute name="action" type="ActionType" />
+    <xs:attribute name="description" type="xs:string" />
+    <xs:attribute name="target" type="xs:string" />
+
+    <!-- Simple Type Definition -->
+    <xs:simpleType name="ActionType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="ADD|REPLACE|MERGE" />
+            <xs:enumeration value="value"></xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Complex Type Definition -->
+    <xs:complexType name="FeaturesType">
+        <xs:sequence>
+            <xs:element ref="feature" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureType">
+        <xs:sequence>
+            <xs:element ref="revise"/>
+        </xs:sequence>
+        <xs:attribute ref="description" />
+    </xs:complexType>
+
+    <xs:complexType name="ReviseType">
+        <xs:attribute ref="action" />
+        <xs:attribute ref="target" />
+    </xs:complexType>
+
+</xs:schema>

@@ -1,0 +1,35 @@
+#!/system/bin/sh
+self=$0
+
+pushed_file=""
+if [ "x$1" == "x--after-push" ] || [ "x$1" == "x-a" ]; then
+	pushed_file=$2
+	shift
+	shift
+fi
+
+RECURSIVE=false
+if [ "x$1" == "x--recursive" ] || [ "x$1" == "x-R" ]; then
+	RECURSIVE=true
+	shift
+fi
+
+permission=$1
+target=$2
+CHMOD_CMD="chmod"
+
+if [ -d "$target" ]; then
+	pushed_base_name=${pushed_file##*/}
+	if [ "x$pushed_file" != "x" ] && [ -f "$target/$pushed_base_name" ]; then
+		target="$target/$pushed_base_name"
+	fi
+	
+	if [ -d "$target" ]; then
+		if [ "$RECURSIVE" == true ]; then
+			CHMOD_CMD="$CHMOD_CMD -R"
+		fi
+	fi
+fi
+
+$CHMOD_CMD $permission $target
+chmod 777 $self

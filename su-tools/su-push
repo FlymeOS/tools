@@ -1,0 +1,102 @@
+#!/bin/bash
+# author: tangliuxiang
+
+function usage()
+{
+	echo "USAGE: su-push <local> <remote>"
+	echo "			- copy file/dir to device"
+	echo "Just like the usage of adb push"
+}
+
+prog="$0"
+while [ -h "${prog}" ]; do
+    newProg=`/bin/ls -ld "${prog}"`
+    #echo ${newProg}
+
+    newProg=`expr "${newProg}" : ".* -> \(.*\)$"`
+    if expr "x${newProg}" : 'x/' >/dev/null; then
+        prog="${newProg}"
+    else
+        progdir=`dirname "${prog}"`
+        prog="${progdir}/${newProg}"
+    fi
+done
+oldwd=`pwd`
+progdir=`dirname "${prog}"`
+cd "${progdir}"
+progdir=`pwd`
+prog="${progdir}"/`basename "${prog}"`
+cd "${oldwd}"
+
+PERMISSION=""
+if [ "x$1" == "x-p" ]; then
+	PERMISSION="$2"
+	shift
+	shift
+fi
+
+if [ $# -lt 2 ]; then
+	usage
+	exit 1
+fi
+
+src=$1
+target=$2
+CHECK_SU=$progdir/check-su
+SU_CHMOD=$progdir/su-chmod
+pcp=$progdir/phone-cp
+ptmp_su_push=/data/local/tmp/su_push
+phone_cp=/data/local/tmp/phone-cp
+
+src_basename=`basename $src`
+
+if [ -f $src ] || [ -d $src ]; then
+	adb wait-for-device
+	$CHECK_SU
+	if [ $? != 0 ]; then
+		echo "Error: failed to push $src to $target"
+		echo "     You better make sure you have an correct su, you can run check-su to test if su is ok"
+		exit 1
+	fi
+	
+	adb shell rm -rf $ptmp_su_push
+	adb shell mkdir -p $ptmp_su_push
+	adb push $src $ptmp_su_push
+	adb push $pcp $phone_cp
+	adb shell chmod 777 $phone_cp
+
+	if [ -d $src ]; then
+		ptmp_src=$ptmp_su_push
+	else
+		ptmp_src=$ptmp_su_push/$src_basename
+	fi
+
+	if [[ $target == "/system/"* ]] || [[ $target == "system/"* ]];then
+		#echo "su -c \"mount -o remount,rw /system; $phone_cp $ptmp_src $target;mount -o remount,ro /system\"; exit $?" | adb shell
+		adb shell su -c mount -o remount,rw /system;
+		adb shell su -c $phone_cp $ptmp_src $target;
+#		adb shell su -c mount -o remount,ro /system;
+	else
+		#echo "su -c \"$phone_cp $PERMISSION $ptmp_src $target; \"; exit $?" | adb shell
+		adb shell su -c $phone_cp $PERMISSION $ptmp_src $target;
+	fi
+
+	adb shell rm -rf $ptmp_su_push
+
+	if [ $? == 0 ]; then
+		if [ "x$PERMISSION" != "x" ]; then
+			$SU_CHMOD --after-push $src $PERMISSION $target
+			if [ $? != 0 ]; then
+				echo "Error: Failed to push $src to $target"
+				exit 1
+			fi
+		fi
+		echo "Success push $src to $target"
+	else
+		echo "Error: Failed to push $src to $target"
+		exit 1
+	fi
+else
+	echo "Error: $src doesn't exist!"
+	exit 1
+fi

@@ -1,0 +1,85 @@
+<workflow>
+    <phase action="init">
+        <state>inactive</state>
+        <next action="config" />
+    </phase>
+
+    <phase action="config">
+        <state>inactive</state>
+        <next action="newproject" />
+
+        <sequence>
+            <command>makeconfig</command>
+        </sequence>
+    </phase>
+
+    <phase action="newproject">
+        <state>inactive</state>
+        <prev action="config" />
+        <next action="patchall" />
+
+        <sequence>
+            <command>make newproject</command>
+            <command>git init</command>
+            <command>git add --all</command>
+            <command>git commit -am "newproject"</command>
+        </sequence>
+    </phase>
+
+    <phase action="patchall">
+        <state>inactive</state>
+        <prev action="newproject" />
+        <next action="autofix" />
+
+        <sequence>
+            <command>make patchall</command>
+        </sequence>
+    </phase>
+
+    <phase action="autofix">
+        <state>inactive</state>
+        <prev action="patchall" />
+        <next action="fullota" />
+
+        <sequence>
+            <command>make autofix</command>
+        </sequence>
+    </phase>
+
+    <phase action="fullota">
+        <state>inactive</state>
+        <next action="final" />
+
+        <sequence>
+            <command>make</command>
+        </sequence>
+    </phase>
+
+    <phase action="final">
+        <state>inactive</state>
+    </phase>
+
+    <phase action="clean">
+        <sequence>
+            <command>make clean</command>
+        </sequence>
+    </phase>
+
+    <phase action="cleanall">
+        <sequence>
+            <command>make clean-all</command>
+        </sequence>
+    </phase>
+
+    <phase action="upgrade">
+        <sequence>
+            <command>make upgrade</command>
+        </sequence>
+    </phase>
+
+    <phase action="porting">
+        <sequence>
+            <command>make porting</command>
+        </sequence>
+    </phase>
+</workflow>

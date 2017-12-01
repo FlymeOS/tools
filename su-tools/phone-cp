@@ -1,0 +1,27 @@
+#!/system/bin/sh
+# author: tangliuxiang
+
+self=$0
+src=$1
+dst=$2
+
+if [ ${dst:${#dst}-1} == '/' ]; then
+	dst=${dst::${#dst}-1}
+fi
+
+if [ -d $src ]; then
+	ls $src | while read f; do
+		$self $src/$f $dst/$f
+	done
+else [ -f $src ]
+	if [ -d $dst ]; then
+		srcBN=${src##*/}
+		echo "cat $src > $dst/$srcBN"
+		cat $src > $dst/$srcBN
+	else
+		dstBN=${dst%/*}
+		mkdir -p $dstBN
+		echo "cat $src > $dst"
+		cat $src > $dst
+	fi
+fi

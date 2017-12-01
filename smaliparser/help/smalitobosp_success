@@ -1,0 +1,7 @@
+  |                                                                                             
+  |  >> ^_^.   All of the smali has been successfully replaced to bosp . Congratulations!                                      
+  |                                                                                             
+  |     Advice:                                                                                 
+  |         You could go on to `make` out a ROM, flash it into                                  
+  |         your device, and then fix bugs depends on real-time logs.                           
+  |                                                                                             

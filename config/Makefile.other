@@ -1,0 +1,10 @@
+# Some inactive Configurations can be used in Makefile
+
+##############################################################################
+# Control whether convert all resource id of #namespace:type@name#t/a form in framework from name to id
+# But framework-res and mediatek-res except, as them have been supported.
+# The default is false.
+# Set true if you actrally use other framework res with name form.
+#-----------------------------------------------------------------------------
+# ALL_FRW_NAME_TO_ID := true
+

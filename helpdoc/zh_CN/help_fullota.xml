@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<items category="fullota">
+	<item name="ERR_OTA_FROM_TARGET_FILES" code="51">
+		<detail>
+		未能运行ota_from_target_files从target-files.zip生成一个ota.zip
+		</detail>
+	</item>
+	
+	<item name="ERR_IMG_FROM_TARGET_FILES" code="52">
+		<detail>
+		未能从target-files.zip上生成一个system.img.
+		</detail>
+	</item>
+
+</items>

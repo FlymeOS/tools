@@ -1,0 +1,12 @@
+#!/system/bin/sh
+
+su -c "mount -o remount,rw /system"
+
+if [ $? == 0 ]; then
+	echo "OK"
+	exit 0
+fi;
+
+echo "ERROR"
+
+

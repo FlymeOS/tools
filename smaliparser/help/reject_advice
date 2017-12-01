@@ -1,0 +1,11 @@
+  |
+  |  >> Advice:                                                                                 
+  |         The reason that these methods can not be replace to bosp                            
+  |           probaly because they are constructor methods,                                     
+  |           where the fields which was added by vendor will be initiated!                     
+  |                                                                                             
+  |         You better fix the remain rejects by yourself! 
+  |         
+  |         How to fix the reject:
+  |           you can find it in "manifests/Coron-Developer-Guide.pdf"
+  |

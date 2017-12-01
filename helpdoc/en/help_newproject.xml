@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<items category="newproject">
+	<item name="ERR_NOT_PREPARE_RECOVERY_FSTAB" code="201">
+		<detail>
+		Can not find recovery.fstab !
+		</detail>
+		<solution>
+		Prepare a recovery.fstab in current project directory !
+		</solution>
+	</item>
+
+	<item name="ERR_NOT_OTA_PACKAGE" code="202">
+		<detail>
+		Can not find ota.zip !
+		</detail>
+		<solution>
+		Prepare a ota.zip in current project directory !
+		</solution>
+	</item>
+
+	<item name="ERR_OTA_INCOMPATIBLE" code="203">
+		<detail>
+		The ota.zip is a incompatible ota package.
+		</detail>
+		<solution>
+		Check whether META-INF and system directory are in ota.zip
+		</solution>
+	</item>
+
+	<item name="ERR_NOT_OEM_TARGET" code="204">
+		<detail>
+		Can not find out/oem_target_files.zip !
+		</detail>
+		<solution>
+		Make clean, and Retry !
+		</solution>
+	</item>
+
+	<item name="ERR_MISSION_FAILED" code="209">
+		<detail>
+		Mission Failed, as catching a Runtime Error.
+		</detail>
+		<solution>
+		Check the build log !
+		</solution>
+	</item>
+
+	<item name="ERR_NOT_PREPARE_RECOVERY_IMG" code="211">
+		<detail>
+		Can not find recovery.img !
+		</detail>
+		<solution>
+		Prepare a recovery.img or recovery.fstab in current project directory !
+		</solution>
+	</item>
+
+	<item name="ERR_NOT_PREPARE_BOOT_IMG" code="212">
+		<detail>
+		Can not find boot.img !
+		</detail>
+		<solution>
+		Prepare a boot.img in current project directory, Or not set boot in vendor_modify_images[Makefile] !
+		</solution>
+	</item>
+
+</items>

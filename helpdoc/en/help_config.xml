@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<items category="config">
+
+	<item name="ERR_NOT_FOUND" code="127">
+		<detail>
+		Error: makeconfig, command not found
+		</detail>
+		<solution>
+		1. Make sure you have setup environment:
+		 $ source build/envsetup.sh
+
+		2. makeconfig must be executable, to check it:
+		 $ ls -l build/tools/makeconfig
+
+		3. you might make it executable by:
+		 $ chmod a+x build/tools/makeconfig
+
+        You should download the tools by "git clone" instead of copying.
+		</solution>
+	</item>
+
+	<item name="ERR_MAKEFILE_EXIST" code="201">
+		<detail>
+		Makefile already exist! Did you already configure you device ?
+		</detail>
+		<solution>
+		If you want to configure again, just remove the existing Makefile.
+		</solution>
+	</item>
+
+	<item name="ERR_OTA_INCOMPATIBLE" code="202">
+		<detail>
+		The ota.zip is a incompatible ota package.
+		</detail>
+		<solution>
+		Check whether META-INF and system directory are in ota.zip
+		</solution>
+	</item>
+	
+	<item name="ERR_MISSION_FAILED" code="209">
+		<detail>
+		Mission Failed, as catching a Runtime Error.
+		</detail>
+		<solution>
+		Check the build log !
+		</solution>
+	</item>
+
+</items>

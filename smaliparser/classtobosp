@@ -1,0 +1,67 @@
+#!/bin/bash
+
+#**************************************************#
+#This shell used to call SCheck to replace smali
+#**************************************************#
+
+CUR_DIR=$(dirname $0)
+SCHECK=$CUR_DIR/SCheck
+PRE_DIR=$PWD
+PRJ_ROOT=$PWD
+
+function usage()
+{
+    echo "################ USAGE ################"
+    echo "#"
+    echo "#    smalitobosp smali"
+    echo "#    		smali: the target smali, which will be replace to bosp"
+    echo "#"
+    echo "# ex:"
+    echo "#    smalitobosp services.jar.out/smali/com/android/server/pm/ShutdownThread.smali"
+    echo "# it will replace the smali mservices.jar.out/smali/com/android/server/pm/ShutdownThread.smali and the memberclass to bosp!"
+    echo "#"
+    echo "# Attention:"
+    echo "# This is not just simple replace, it will check the methods, fields, class which was used can be found!"
+    echo "#"
+}
+
+if [ $# -lt 1 ]; then
+    usage
+    exit 1
+fi
+
+function getPrjRoot()
+{
+	while [ ! -f $PRJ_ROOT/Makefile ] && [ ! -f $PRJ_ROOT/makefile ]
+	do
+		PRJ_ROOT=`dirname $PRJ_ROOT`
+		if [ $PRJ_ROOT == '/' ]; then
+			echo "Error: can not get the project's root directory!"
+			echo "       make sure you run this command in your device directory"
+			exit 1
+		fi
+	done
+
+	if [ ${PRJ_ROOT#$PORT_ROOT*} == $PRJ_ROOT ]; then
+		echo "Error: you should run 'source ./build/envsetup.sh' in coron first!"
+		exit 1
+	fi
+}
+
+function main()
+{
+	if [ $# -lt 1 ]; then
+		usage
+		exit 1
+	fi
+	getPrjRoot
+
+	cd $PRJ_ROOT > /dev/null
+	tmpFile=`mktemp -t methodtobosp.XXXXX`
+	echo "$@" > $tmpFile
+	make smalitobosp SMALI_FILE=$tmpFile
+	rm $tmpFile
+	cd $PRE_DIR > /dev/null
+}
+
+main $@

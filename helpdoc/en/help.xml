@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- code range: 0~255 -->
+
+<items>
+    <item name="SUCCESS" code="00" />
+
+	<item name="tale" code="255">
+		<detail>
+
+		Here is a long story, we have been telling it for a long time, and still believe somebody will continue it.
+
+                                    The tale of CORON will never stop.
+
+       ────────────────────────────────────────────────────────────────────────────────────
+
+              MMML          MHHL         "MMMMMMM'           MMML        M                                  
+           IMM*CC*MMM     IMLMHCMMML     MMM*ZJH*MMH      IMMM--CML       ML        H                       
+         IMMML           MMM     IMMC    $MM     MMM     MMMC    MMML     MMM       H                       
+         MMM           'MMM       MMMH   $MMI--IHMMM   IMMM'     MMMMH    MMMM      M                       
+         MMM           MMMM      MMMM$   MMM$MMMMM     MMMM:     MMMM$   IMMM MM    MM                      
+         MMMMH:     M  HMMMH     MMMM:   MMMM  ?MM     HMMMH     MMMMI   MMMM  MMM  MML                     
+         IMMM*DQZ*MMM   HMMM  H*ZWP*M    MMMM   MMML    HMMMMM-HMMMM$    MMMM   MMMMMMM                     
+            HMMMMMMMC      IMMMMMCL     *TLX*  IMMMMM      ICMMMML     IMMMMM      IMMM                     
+             IMMMHHH        IMIHL      HMMMMM  IMMMMM        IMMH      HMMMMM       MMM    
+
+       ────────────────────────────────────────────────────────────────────────────────────
+
+		What is CORON?
+		  * CORON is an open source project for Android ROM porting.
+		  * With plentiful tools of CORON, developers could board ROM on target device in one step.
+		  * In CORON, courses of Android porting is available, including video and online tutorials.  
+
+		Why named CORON?
+		  * CORON stands for CO-operated RON(m), born to be cooperative with ROM developers;
+		  * CORON stands for RON(m) Over Cloud, provides access of huge remote servers' ability;
+		  * CORON is also an island, paradise of divers. It shows simple and tasteful feelings.
+
+		How to use CORON?
+		  After setup enviornment of CORON, type command `coron` to see the usage. 
+		  The amazing tools may tell you it is so hard to put CORON down.
+		  You local directory of CORON is like:
+
+		  coron                        │  # The root of coron
+		    ├── manifest               │  # Introduce to coron, including tutorials
+		    │                          │
+		    ├── board                  │  # Holding all the board concerned
+		    │     ├── frameworks       │
+		    │     │      └── overlay   │  # Overlay resources of framework
+		    │     └── release          │  # Released Apks and Jars
+		    │                          │
+		    ├── devices                │  # Holding all the porting devices
+		    │     ├── base             │  # The base of all other devices.
+		    │     └── yourdevice       │  # Your own device to be ported
+		    │                          │
+		    ├── build                  │  # Build environment
+		    └── tools                  │  # Tools
+
+		CORON open for you forever, hope some day you will join us.
+
+		</detail>
+	</item>
+
+	<item name="fire" code="254">
+		<detail>
+		Porting ROM in one step. All the progress of ROM porting will be concentrated in to one step.
+		</detail>
+	</item>
+
+	<item name="help" code="253">
+		<detail>
+		Type `help name` to find out more about the `name`.
+		</detail>
+	</item>
+
+	<item name="help_usage" code="252">
+		<detail>
+		An open source project for Android ROM porting.
+		</detail>
+	</item>
+
+	<item name="help_license" code="251">
+		<detail>
+		Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
+		</detail>
+	</item>
+
+	<item name="help_cmds" code="250">
+		<detail>
+		COMMANDs are:
+		</detail>
+	</item>
+
+	<item name="err_code" code="249">
+		<detail>
+		Error Codes
+		</detail>
+	</item>
+
+	<item name="config" code="10">
+		<detail>
+		Genearate the configuration for a new device.
+		A Makefile containing all the configurations will be generated. 
+		</detail>
+	</item>
+
+	<item name="newproject" code="20">
+		<detail>
+		Generate the new project for a new device.
+		Only used when setup your device project.
+		</detail>
+	</item>
+
+	<item name="patchall" code="30">
+		<detail>
+		Patch all the changes.
+		Incorpate all the changes from BOSP to AOSP into VENDOR.
+		 BOSP  : Code of Board Open Source Project
+		 AOSP  : Code Android Open Source Project
+		 VENDOR: Code pulled out from the device
+
+		The codes of VENDOR are located in the root directory of your device.
+		The codes of AOSP and BOSP are located in the autopatch directory of your device.
+		</detail>
+	</item>
+
+	<item name="autofix" code="248">
+		<detail>
+		Resolve conflicts.
+		After patchall, conflicts might happen, autofix could help you
+		to resolve some of them automatically.
+		</detail>
+	</item>
+
+	<item name="fullota" code="50">
+		<detail>
+		Fully make out the ota package.
+		An OTA package will be generated, you could flash it into your device.
+		</detail>
+	</item>
+
+	<item name="upgrade" code="60">
+		<detail>
+		Patch the upgrade changes. You could upgrade your device to the latest.
+		 Using parameter "LAST_COMMIT=xx" to patch changes from LAST_COMMIT
+		</detail>
+	</item>
+
+	<item name="porting" code="70">
+		<detail>
+		Porting changes from an existing device to another.
+		 Using parameter "COMMIT1=xx COMMIT2=xx" to patch changes from COMMIT1 to COMMIT2
+		</detail>
+	</item>
+
+	<item name="clean" code="80" >
+	    <detail>
+		Clean the project output.
+		</detail>
+	</item>
+
+	<item name="cleanall" code="90" >
+		<detail>
+		Clean all the project unneccessary files, inluding board/ and out/.
+		</detail>
+	</item>
+
+	<!--
+	<item name="reserved" code="100" />
+	<item name="reserved" code="110" />
+	<item name="reserved" code="120" />
+	<item name="reserved" code="130" />
+	<item name="reserved" code="140" />
+	-->
+
+    <item name="NO_CONFLICT" code="31">
+		<solution>
+		  Advice:
+		    1. Although no conflict, mistakes still come out sometimes,
+		       it depends on your device, VENDOR may change AOSP a lot.
+
+		    2. Fall through to fullota, flash the outcome into your device,
+		       and then fix bugs depends on real-time logs.
+		</solution>
+	</item>
+
+	<item name="CONFLICTS_HAPPENED" code="32">
+		<solution>
+		  Advice:
+		    1. Each conflict is marked out like:
+
+		      &lt;&lt;&lt;&lt;&lt;&lt;&lt; VENDOR
+		        Codes of VENDOR
+		      =======
+		        Codes of BOSP
+		      &gt;&gt;&gt;&gt;&gt;&gt;&gt; BOSP
+
+		      you'd better resolve all conflicts before going on with the following work.
+
+		    2. You might follow three steps to resolve conflicts manually:
+
+		       - compare VENDOR and REJECT to find out where conflicts happened;
+		       - compare AOSP   and BOSP   to find out why conflicts happened;
+		       - resolve conflicts in VENDOR.
+		</solution>
+	</item>
+
+	<item name="ERR_USB_NOT_CONNECTED" code="151">
+		<detail>
+		Can not find device
+		</detail>
+		<solution>
+		Please make sure your device has been connected.
+		</solution>
+	</item>
+
+	<item name="ERR_DEVICE_NOT_ROOTED" code="152">
+		<detail>
+		Can not acquire ROOT permission
+		</detail>
+	</item>
+
+	<item name="ERR_UNPACK_BOOTIMG_FAILED" code="153">
+		<detail>
+		Unpack bootimg failed. Your boot.img or recovery.img might be imformal that could not be unpacked out.
+		</detail>
+		<solution>
+		Using the following command to check whether your image can be unpacked:
+		  $ unpack_bootimg recovery.img
+
+		If unpack failed, use another recovery.img.
+		</solution>
+	</item>
+
+	<item name="ERR_PACK_BOOTIMG_FAILED" code="154">
+		<detail>
+		Pack bootimg failed. Your boot.img or recovery.img might be informal that could not be packed back.
+		</detail>
+		<solution>
+		Using the following command to check whether your image can be unpacked:
+		  $ pack_bootimg image_out/
+
+		If pack failed, unpack your boot image again.
+		</solution>
+	</item>
+
+	<item name="ERR_DEVICE_BASE_NOT_FOUND" code="155">
+		<detail>
+		devices/base not found!
+		</detail>
+		<solution>
+		Make sure you have synced the base, and the path is devices/base.
+		If devices/base not exists, try to use "repo sync" to sync again.
+		</solution>
+	</item>
+
+	<item name="ERR_PULL_BOOT_RECOVERY_FAILED" code="156">
+		<detail>
+		Failed to pull boot.img and recovery.img from your phone.
+		</detail>
+		<solution>
+		Check adb devices is fine and your phone is su root!
+		</solution>
+	</item>
+
+	<item name="ERR_WRONG_PARAMETERS" code="157">
+		<detail>
+		Wrong parameters for this command....
+		</detail>
+	</item>
+
+	<item name="ERR_AUTOCOM_FAILED" code="158">
+		<detail>
+		Failed to autocomplete missed method in android.policy and Phone.
+		</detail>
+		<solution>
+		Please check you have Phone.apk and in vendor/system/app and it can be decode correctly. Try:
+          $ apktool d vendor/system/app/Phone.apk
+		If you don't have Phone.apk, it must be renamed to someoneelse, find it and rename to Phone.apk.
+		if the decode of Phone.apk is failed, just remove the Phone.apk in vendor/system/app, then go on!
+		</solution>
+	</item>
+
+	<item name="ERR_METHODTOBOSP_FAILED" code="159">
+		<detail>
+		Failed to replace method to bosp.
+		</detail>
+		<solution>
+		Make sure both of the vendor and bosp have this smali file!
+		And the method name is fine, such as 
+		  $ methodtobosp services.jar.out/smali/com/android/server/am/ActivityManagerService.smali 'moveTaskToFront(IILandroid/os/Bundle;)V'
+		</solution>
+	</item>
+
+	<item name="ERR_SMALITOBOSP_FAILED" code="160">
+		<detail>
+		Failed to replace smali file to bosp.
+		</detail>
+		<solution>
+		Make sure both of the vendor and bosp have this smali file!
+		</solution>
+	</item>
+
+	<item name="ERR_SMALITOBOSP_FAILED" code="160">
+		<detail>
+		Failed to replace smali file to bosp.
+		</detail>
+		<solution>
+		Make sure both of the vendor and bosp have this smali file!
+		</solution>
+	</item>
+
+	<item name="ERR_APKTOOL_BUILD_FAILED" code="161">
+		<detail>
+		Failed to use apktool build apk back.
+		</detail>
+		<solution>
+		Make sure you don't install any framework resource after you decode the apk,
+		otherwise you should install the framework resource which match your apk, then build again
+		  $ ifdir xxx/system/framework
+
+		Example: 
+		If you want build out's apk, you better install out's framework first! 
+		  $ ifdir out/merged_target_files/SYSTEM/framework/
+		</solution>
+	</item>
+
+	<item name="ERR_APKTOOL_DECODE_FAILED" code="162">
+		<detail>
+		Failed to use apktool d xxx.apk.
+		</detail>
+		<solution>
+		Make sure the destination directory doesn't exist! 
+		And install framework resource first 
+		  $ ifdir xxx/system/framework
+
+		Example: 
+		If you want decode board's apk, you better install board's framework first! 
+		  $ ifdir board/system/framework
+		</solution>
+	</item>
+
+	<item name="ERR_DEODEX_FAILED" code="163">
+		<detail>
+		Failed to deodex ota.zip/target-files.zip.
+		</detail>
+		<solution>
+		If it doesn't work, you better find some other tools to deodex.
+		</solution>
+	</item>	
+
+</items>
