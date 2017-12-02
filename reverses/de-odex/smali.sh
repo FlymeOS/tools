@@ -56,7 +56,7 @@ javaOpts=""
 # line and adjust the value accordingly. Use "java -X" for a list of options
 # you can pass here.
 # 
-javaOpts="-Xmx512M"
+javaOpts="-Xmx1024M"
 
 # Alternatively, this will extract any parameter "-Jxxx" from the command line
 # and pass them to Java (instead of to dx). This makes it possible for you to

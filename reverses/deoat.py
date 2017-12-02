@@ -44,6 +44,8 @@ class OatZip:
     """
 
     OAT2DEX = os.path.join(os.path.dirname(__file__), "de-oat", "oat2dex.sh")
+    SMALI = os.path.join(os.path.dirname(__file__), "de-odex", "smali.sh")
+    BAKSMALI = os.path.join(os.path.dirname(__file__), "de-odex", "baksmali.sh")
 
     def __init__(self, unzipRoot):
         self.mRoot = unzipRoot
@@ -139,9 +141,9 @@ class OatZip:
             return self
 
         # Phase 1: de-oat boot.oat
-        OatZip.deoatBootOAT(os.path.join(self.mFrwDir, self.arch, "boot.oat"))
+        OatZip.deoatBootOAT(self.mFrwDir, self.arch)
         if self.arch2.strip():
-            OatZip.deoatBootOAT(os.path.join(self.mFrwDir, self.arch2, "boot.oat"))
+            OatZip.deoatBootOAT(self.mFrwDir, self.arch2)
 
         # Phase 2: de-oat all the other oat files, of which suffix is odex.
         # [Android 5.0]: All the oat jars are located in the same folder with boot.oat
@@ -219,12 +221,13 @@ class OatZip:
 
 
     @staticmethod
-    def deoatBootOAT(bootOAT):
+    def deoatBootOAT(frwDir, arch):
         """ De-oat boot.oat
         """
-        bootClassFolder = os.path.dirname(bootOAT)
-        bootClassFolderDex = os.path.join(bootClassFolder, "dex")
-        bootClassFolderOdex = os.path.join(bootClassFolder, "odex")
+        bootClassFolder = os.path.join(frwDir, arch)
+        bootOatPath = os.path.join(bootClassFolder, "boot.oat")
+        bootClassFolderDex = os.path.join(frwDir, arch + "-dex")
+        bootClassFolderOdex = os.path.join(frwDir, arch + "-odex")
 
         if os.path.exists(bootClassFolderDex):
             Log.d(TAG, "Delete the already exists %s" %bootClassFolderDex)
@@ -234,7 +237,33 @@ class OatZip:
             shutil.rmtree(bootClassFolderOdex)
 
         Log.i(TAG, "De-oat %s" % bootClassFolder)
-        Utils.runWithOutput([OatZip.OAT2DEX, "boot", bootClassFolder])
+        if OPTIONS.use_baksmali:
+            for item in os.listdir(bootClassFolder):
+                if item.endswith(".oat"):
+                    oatPath = os.path.join(bootClassFolder, item)
+                    dexlist = Utils.runWithResult([OatZip.BAKSMALI, "list", "dex", oatPath])
+                    jarName = os.path.basename(dexlist[0].strip("\n"))
+                    jarOutDir = os.path.join(frwDir, arch + "-odex", jarName + ".out")
+                    dexDir = os.path.join(frwDir, arch + "-dex")
+                    if not os.path.exists(dexDir):
+                        os.makedirs(dexDir)
+                    for dex in dexlist:
+                        if dex.strip("\n").endswith(".jar"):
+                            dexName = ""
+                            smaliDir = "smali"
+                            dexSaveName = jarName[0:-4] + ".dex"
+                        else:
+                            dexName = dex.strip("\n").split(":")[1]
+                            smaliDir = "smali_" + dexName[0:-4]
+                            dexSaveName = jarName[0:-4] + "-" + dexName
+                        Log.d(TAG, "baksmali deodex -b %s %s -o %s" % (bootOatPath, os.path.join(oatPath, dexName), os.path.join(jarOutDir, smaliDir)))
+                        Utils.runWithOutput([OatZip.BAKSMALI, "deodex", "-b",
+                                            bootOatPath, os.path.join(oatPath, dexName), "-o", os.path.join(jarOutDir, smaliDir)])
+                        Log.d(TAG, "smali assemble %s -o %s" % (os.path.join(jarOutDir, smaliDir), os.path.join(dexDir, dexSaveName)))
+                        Utils.runWithOutput([OatZip.SMALI, "assemble", os.path.join(jarOutDir, smaliDir),
+                                            "-o", os.path.join(dexDir, dexSaveName)])
+        else:
+            Utils.runWithOutput([OatZip.OAT2DEX, "boot", bootClassFolder])
 
     @staticmethod
     def packageDexToAppWithArch(apkFile, arch):
@@ -314,7 +343,16 @@ class OatZip:
                 jarFile = os.path.join(frwDir, item[0:-5] + ".jar")
                 if not OatZip.isDeodexed(jarFile):
                     odexFile = os.path.join(oatDir, item)
-                    Utils.runWithOutput([OatZip.OAT2DEX, odexFile, archDir])
+                    if OPTIONS.use_baksmali:
+                        bootOatPath = os.path.join(archDir, "boot.oat")
+                        jarOutDir = os.path.join(oatDir, item[0:-5] + ".jar.out")
+                        dexFile = os.path.join(oatDir, item[0:-5] + ".dex")
+                        Log.d(TAG, "baksmali deodex -b %s %s -o %s" % (bootOatPath, odexFile, jarOutDir))
+                        Utils.runWithOutput([OatZip.BAKSMALI, "deodex", "-b", bootOatPath, odexFile, "-o", jarOutDir])
+                        Log.d(TAG, "smali assemble %s -o %s" % (jarOutDir, dexFile))
+                        Utils.runWithOutput([OatZip.SMALI, "assemble", jarOutDir, "-o", dexFile])
+                    else:
+                        Utils.runWithOutput([OatZip.OAT2DEX, odexFile, archDir])
 
     @staticmethod
     def isDeodexed(apkFile):
@@ -348,16 +386,33 @@ class OatZip:
             #if [[ -d "$appdir/$app/$arch" ]];
             if os.path.exists(archPath):
                 odexFile = os.path.join(archPath, app + ".odex")
-
-                #java -Xmx512m -jar $oat2dex $appdir/$app/$arch/$app.odex $framedir/$arch/odex
-                Utils.runWithOutput([OatZip.OAT2DEX, odexFile, bootClassFolderArch])
+                if OPTIONS.use_baksmali:
+                    bootOatPath = os.path.join(frwDir, arch, "boot.oat")
+                    dexOutDir = os.path.join(archPath, app + ".out")
+                    dexFile = os.path.join(archPath, app + ".dex")
+                    Log.d(TAG, "baksmali deodex -b %s %s -o %s" % (bootOatPath, odexFile, dexOutDir))
+                    Utils.runWithOutput([OatZip.BAKSMALI, "deodex", "-b", bootOatPath, odexFile, "-o", dexOutDir])
+                    Log.d(TAG, "smali assemble %s -o %s" % (dexOutDir, dexFile))
+                    Utils.runWithOutput([OatZip.SMALI, "assemble", dexOutDir, "-o", dexFile])
+                else:
+                    #java -Xmx512m -jar $oat2dex $appdir/$app/$arch/$app.odex $framedir/$arch/odex
+                    Utils.runWithOutput([OatZip.OAT2DEX, odexFile, bootClassFolderArch])
             else:
                 # if exists arch2
                 if arch2.strip():
                     arch2Path = os.path.join(appPath, "oat", arch2)
                     if os.path.exists(arch2Path):
                         odexFile2 = os.path.join(arch2Path, app + ".odex")
-                        Utils.runWithOutput([OatZip.OAT2DEX, odexFile2, bootClassFolderArch2])
+                        if OPTIONS.use_baksmali:
+                            bootOatPath2 = os.path.join(frwDir, arch2, "boot.oat")
+                            dexOutDir2 = os.path.join(arch2Path, app + ".out")
+                            dexFile2 = os.path.join(arch2Path, app + ".dex")
+                            Log.d(TAG, "baksmali deodex -b %s %s -o %s" % (bootOatPath2, odexFile2, dexOutDir2))
+                            Utils.runWithOutput([OatZip.BAKSMALI, "deodex", "-b", bootOatPath2, odexFile2, "-o", dexOutDir2])
+                            Log.d(TAG, "smali assemble %s -o %s" % (dexOutDir2, dexFile2))
+                            Utils.runWithOutput([OatZip.SMALI, "assemble", dexOutDir2, "-o", dexFile2])
+                        else:
+                            Utils.runWithOutput([OatZip.OAT2DEX, odexFile2, bootClassFolderArch2])
 
 
     @staticmethod
@@ -475,7 +530,16 @@ class OatZip:
                         if not OatZip.isDeodexed(apkFile):
                             odexFile = os.path.join(archDir, app + ".odex")
                             if os.path.exists(odexFile):
-                                Utils.runWithOutput([OatZip.OAT2DEX, odexFile, bootClassFolderArch])
+                                if OPTIONS.use_baksmali:
+                                    bootOatPath = os.path.join(frwDir, arch, "boot.oat")
+                                    dexOutDir = os.path.join(archDir, app + ".out")
+                                    dexFile = os.path.join(archDir, app + ".dex")
+                                    Log.d(TAG, "baksmali deodex -b %s %s -o %s" % (bootOatPath, odexFile, dexOutDir))
+                                    Utils.runWithOutput([OatZip.BAKSMALI, "deodex", "-b", bootOatPath, odexFile, "-o", dexOutDir])
+                                    Log.d(TAG, "smali assemble %s -o %s" % (dexOutDir, dexFile))
+                                    Utils.runWithOutput([OatZip.SMALI, "assemble", dexOutDir, "-o", dexFile])
+                                else:
+                                    Utils.runWithOutput([OatZip.OAT2DEX, odexFile, bootClassFolderArch])
 
                                 OatZip.packageDexToAppWithArch(apkFile, arch)
                         #rm -rf $appdir/$app/$arch
@@ -484,9 +548,18 @@ class OatZip:
                     arch2Dir = os.path.join(dirpath, "oat", arch2)
                     if os.path.exists(arch2Dir):
                         if not OatZip.isDeodexed(apkFile):
-                            odexFile = os.path.join(arch2Dir, app + ".odex")
-                            if os.path.exists(odexFile):
-                                Utils.runWithOutput([OatZip.OAT2DEX, odexFile, bootClassFolderArch2])
+                            odexFile2 = os.path.join(arch2Dir, app + ".odex")
+                            if os.path.exists(odexFile2):
+                                if OPTIONS.use_baksmali:
+                                    bootOatPath2 = os.path.join(frwDir, arch2, "boot.oat")
+                                    dexOutDir2 = os.path.join(arch2Dir, app + ".out")
+                                    dexFile2 = os.path.join(arch2Dir, app + ".dex")
+                                    Log.d(TAG, "baksmali deodex -b %s %s -o %s" % (bootOatPath2, odexFile2, dexOutDir2))
+                                    Utils.runWithOutput([OatZip.BAKSMALI, "deodex", "-b", bootOatPath2, odexFile2, "-o", dexOutDir2])
+                                    Log.d(TAG, "smali assemble %s -o %s" % (dexOutDir2, dexFile2))
+                                    Utils.runWithOutput([OatZip.SMALI, "assemble", dexOutDir2, "-o", dexFile2])
+                                else:
+                                    Utils.runWithOutput([OatZip.OAT2DEX, odexFile2, bootClassFolderArch2])
 
                                 OatZip.packageDexToAppWithArch(apkFile, arch2)
                         #rm -rf $appdir/$app/$arch

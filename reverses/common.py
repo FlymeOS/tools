@@ -59,6 +59,8 @@ class Options(object):
         self.inZip  = None
         self.outZip = None
 
+        self.use_baksmali = False
+
 
     def handle(self, argv):
         """ Handle input arguments.
@@ -69,8 +71,8 @@ class Options(object):
             sys.exit(1)
 
         try:
-            (opts, args) = getopt.getopt(argv[1:], "hafl:c:i:o:", \
-                            [ "help", "app", "framework", "apilevel=", "classpath=", "input=", "output=" ])
+            (opts, args) = getopt.getopt(argv[1:], "haflu:c:i:o:", \
+                            [ "help", "app", "framework", "use-baksmali", "apilevel=", "classpath=", "input=", "output=" ])
             Log.d(TAG, "Program args = %s" %args)
         except getopt.GetoptError:
             Options.usage()
@@ -85,6 +87,9 @@ class Options(object):
 
             elif name in ("--framework", "-f"):
                 self.formatFrw = True
+
+            elif name in ("--use-baksmali", "-u"):
+                self.use_baksmali = True
 
             elif name in ("--apilevel",  "-l"):
                 self.apiLevel = value
@@ -120,6 +125,11 @@ class Utils:
     def runWithOutput(args):
         subp = Utils.run(args, stdout=subprocess.PIPE)
         Utils.printSubprocessOut(subp)
+
+
+    @staticmethod
+    def runWithResult(args):
+        return Utils.run(args, stdout=subprocess.PIPE).stdout.readlines()
 
 
     @staticmethod
