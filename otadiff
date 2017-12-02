@@ -66,8 +66,8 @@ function ota2target()
         mv $preTmpDir/system $preTmpDir/SYSTEM
         ls $preTmpDir/*.img
         if [ $? == 0 ]; then
-            mkdir $preTmpDir/BOOTABLE_IMAGES
-            mv $preTmpDir/*.img $preTmpDir/BOOTABLE_IMAGES
+            mkdir $preTmpDir/IMAGES
+            mv $preTmpDir/*.img $preTmpDir/IMAGES
         fi
 
         postTmpDir=`mktemp -dt post.target.XXXX`
