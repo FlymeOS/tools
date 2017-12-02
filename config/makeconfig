@@ -192,7 +192,7 @@ function getResolution()
 		return 0
 	fi
 	RESOLUTION=$(adb shell wm size \
-		| awk 'BEGIN{FS=": "}{print $NF}')
+		| awk 'BEGIN{FS=": "}{print $NF}' | head -1)
 }
 
 function getDensity()
