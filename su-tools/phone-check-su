@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-su -c "mount -o remount,rw /system"
+su -c "mount -o rw,remount /system"
 
 if [ $? == 0 ]; then
 	echo "OK"

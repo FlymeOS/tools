@@ -159,7 +159,7 @@ class OatZip:
 
         # Phase 4: de-oat framework
         # de-oat framework
-        OatZip.deoatFrwWithArch(self.mFrwDir, self.arch)
+        #OatZip.deoatFrwWithArch(self.mFrwDir, self.arch)
 
         # de-oat framework/oat/$arch
         OatZip.deoatFrwOatWithArch(self.mFrwDir, self.arch)
@@ -186,11 +186,11 @@ class OatZip:
 
         # repackage framework
         #$framedir/$arch
-        OatZip.repackageFrwWithArch(self.mFrwDir, os.path.join(self.mFrwDir, self.arch))
+        #OatZip.repackageFrwWithArch(self.mFrwDir, os.path.join(self.mFrwDir, self.arch))
 
         #$framedir/$arch/dex
-        if os.path.exists(os.path.join(self.mFrwDir, self.arch, "dex")):
-            OatZip.repackageFrwWithArch(self.mFrwDir, os.path.join(self.mFrwDir, self.arch, "dex"))
+        if os.path.exists(os.path.join(self.mFrwDir, self.arch + "-dex")):
+            OatZip.repackageFrwWithArch(self.mFrwDir, os.path.join(self.mFrwDir, self.arch + "-dex"))
 
         #$framedir/oat/$arch
         if os.path.exists(os.path.join(self.mFrwDir, "oat", self.arch)):
@@ -201,10 +201,20 @@ class OatZip:
 
         # Remove arch and arch2 dir
         os.chdir(self.mRoot)
-        shutil.rmtree(os.path.join(self.mFrwDir, self.arch))
+        if os.path.exists(os.path.join(self.mFrwDir, self.arch)):
+            shutil.rmtree(os.path.join(self.mFrwDir, self.arch))
+        if os.path.exists(os.path.join(self.mFrwDir, self.arch + "-dex")):
+            shutil.rmtree(os.path.join(self.mFrwDir, self.arch + "-dex"))
+        if os.path.exists(os.path.join(self.mFrwDir, self.arch + "-odex")):
+            shutil.rmtree(os.path.join(self.mFrwDir, self.arch + "-odex"))
         if self.arch2.strip():
-            shutil.rmtree(os.path.join(self.mFrwDir, self.arch2))
-        if os.path.exists(os.path.join(self.mFrwDir, "oat")) :
+            if os.path.exists(os.path.join(self.mFrwDir, self.arch2)):
+                shutil.rmtree(os.path.join(self.mFrwDir, self.arch2))
+            if os.path.exists(os.path.join(self.mFrwDir, self.arch2 + "-dex")):
+                shutil.rmtree(os.path.join(self.mFrwDir, self.arch2 + "-dex"))
+            if os.path.exists(os.path.join(self.mFrwDir, self.arch2 + "-odex")):
+                shutil.rmtree(os.path.join(self.mFrwDir, self.arch2 + "-odex"))
+        if os.path.exists(os.path.join(self.mFrwDir, "oat")):
             shutil.rmtree(os.path.join(self.mFrwDir, "oat"))
 
 
@@ -223,8 +233,8 @@ class OatZip:
             Log.d(TAG, "Delete the already exists %s" %bootClassFolderOdex)
             shutil.rmtree(bootClassFolderOdex)
 
-        Log.i(TAG, "De-oat %s" % bootOAT)
-        Utils.runWithOutput([OatZip.OAT2DEX, "boot", bootOAT])
+        Log.i(TAG, "De-oat %s" % bootClassFolder)
+        Utils.runWithOutput([OatZip.OAT2DEX, "boot", bootClassFolder])
 
     @staticmethod
     def packageDexToAppWithArch(apkFile, arch):
@@ -294,7 +304,7 @@ class OatZip:
 
         Log.i(TAG, "De-oat files of oat-format in %s/oat" % frwDir)
         archDir = os.path.join(frwDir, arch)
-        odexDir = os.path.join(archDir, "odex")
+        #odexDir = os.path.join(archDir, "odex")
         oatDir = os.path.join(frwDir, "oat", arch)
 
         if not os.path.exists(oatDir): return
@@ -304,7 +314,7 @@ class OatZip:
                 jarFile = os.path.join(frwDir, item[0:-5] + ".jar")
                 if not OatZip.isDeodexed(jarFile):
                     odexFile = os.path.join(oatDir, item)
-                    Utils.runWithOutput([OatZip.OAT2DEX, odexFile, odexDir])
+                    Utils.runWithOutput([OatZip.OAT2DEX, odexFile, archDir])
 
     @staticmethod
     def isDeodexed(apkFile):
@@ -326,8 +336,8 @@ class OatZip:
 
         Log.i(TAG, "De-oat files of oat-format in %s" %(appsDir))
 
-        bootClassFolderArch = os.path.join(frwDir, arch, "odex")
-        bootClassFolderArch2 = os.path.join(frwDir, arch2, "odex")
+        bootClassFolderArch = os.path.join(frwDir, arch + "-odex")
+        bootClassFolderArch2 = os.path.join(frwDir, arch2 + "-odex")
 
         #for app in $( ls $appdir ); do
         for app in os.listdir(appsDir):
@@ -441,8 +451,8 @@ class OatZip:
         # Keep the old directory, we will change back after some operations.
         oldDir = os.path.abspath(os.curdir)
 
-        bootClassFolderArch = os.path.join(frwDir, arch, "odex")
-        bootClassFolderArch2 = os.path.join(frwDir, arch2, "odex")
+        bootClassFolderArch = os.path.join(frwDir, arch)
+        bootClassFolderArch2 = os.path.join(frwDir, arch2)
 
         for (dirpath, dirnames, filenames) in os.walk(systemDir):
 

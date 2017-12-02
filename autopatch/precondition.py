@@ -423,6 +423,10 @@ class BaseDevice:
         os.chdir(self.targetPath)
 
 
+    def target_is_ab_system(self):
+        return os.path.exists(os.path.join(self.targetPath, "ROOT"))
+
+
     def aosp(self, aospDst):
         """ Prepare AOSP to asopDst
         """
@@ -436,7 +440,7 @@ class BaseDevice:
 
         if not os.path.exists(aospDst):
             Log.i(TAG, "Generating %s from %s" % (aospDst, aospSrc))
-            Utils.copyAPKandJAR(aospSrc, aospDst)
+            Utils.copyAPKandJAR(aospSrc, aospDst, self.target_is_ab_system())
 
 
     def bosp(self, bospDst, force=True):
@@ -448,7 +452,7 @@ class BaseDevice:
             subp.communicate()
 
         Log.i(TAG, "Generating %s from %s" %(bospDst, self.basePath))
-        Utils.copyAPKandJAR(self.basePath, bospDst)
+        Utils.copyAPKandJAR(self.basePath, bospDst, self.target_is_ab_system())
 
 
     def getFilesChanged(self, lowerCommit, upperCommit):
@@ -587,12 +591,28 @@ class Utils:
 
 
     @staticmethod
-    def copyAPKandJAR(src, dst):
+    def copyAPKandJAR(src, dst, targetAbSystem):
         if not os.path.exists(dst):
             os.makedirs(dst)
 
-        bootImage = os.path.join(src, "boot.img.out")
-        subp = Utils.run(["cp", "-r", bootImage, dst], stdout=subprocess.PIPE)
+        baseRootPath = os.path.join(src, "ROOT")
+        baseBootPath = os.path.join(src, "boot.img.out")
+        baseRamDisk = os.path.join(baseBootPath, "RAMDISK")
+        dstRootPath = os.path.join(dst, "ROOT")
+        dstBootPath = os.path.join(dst, "boot.img.out")
+        dstRamDisk = os.path.join(dstBootPath, "RAMDISK")
+        baseAbSystem = os.path.exists(baseRootPath)
+        if baseAbSystem:
+            if targetAbSystem:
+                subp = Utils.run(["cp", "-r", baseRootPath, dst], stdout=subprocess.PIPE)
+            else:
+                os.makedirs(dstBootPath)
+                subp = Utils.run(["cp", "-r", baseRootPath, dstRamDisk], stdout=subprocess.PIPE)
+        else:
+            if targetAbSystem:
+                subp = Utils.run(["cp", "-r", baseRamDisk, dstRootPath], stdout=subprocess.PIPE)
+            else:
+                subp = Utils.run(["cp", "-r", baseBootPath, dst], stdout=subprocess.PIPE)
         subp.communicate()
 
         frwRes = os.path.join(src, "framework-res")

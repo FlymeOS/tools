@@ -50,7 +50,7 @@ ERR_MISSION_FAILED=209
 function checkAdbConnect()
 {
 	echo ">>> Check connecting state"
-	adb shell ls / > /dev/null 2>&1
+	adb shell ls /system > /dev/null 2>&1
 	if [ $? != "0" ];then
 		echo ">>> Device is not found, Please connect device and pc with USB cable, and open Adb Debug in device."
 		exit $ERR_USB_NOT_CONNECTED
@@ -66,7 +66,7 @@ function waitForDeviceOnline ()
 	local timeout=30
 	while [ $timeout -gt 0 ]
 	do
-		if adb shell ls > /dev/null 2>&1; then
+		if adb shell ls /system > /dev/null 2>&1; then
 			echo ">>> device is online"
 			break
 		fi
@@ -83,9 +83,9 @@ function waitForDeviceOnline ()
 function checkAdbRoot()
 {
 	echo ">>> Check adb root state"
-	SECURE_PROP=$(adb shell cat /default.prop | grep -o "ro.secure=\w")
-	DEBUG_PROP=$(adb shell cat /default.prop | grep -o "ro.debuggable=\w")
-	if [ "$SECURE_PROP" = "ro.secure=0" -o "$DEBUG_PROP" = "ro.debuggable=1" ];then
+	SECURE_PROP=$(adb shell getprop ro.secure)
+	DEBUG_PROP=$(adb shell getprop ro.debuggable)
+	if [ x"$SECURE_PROP" = x"0" -o x"$DEBUG_PROP" = x"1" ];then
 		echo ">>> Kernel root ready, run adb root"
 		adb root
 		waitForDeviceOnline
@@ -313,6 +313,16 @@ function getvendorSavedApps()
 	fi
 }
 
+function getSystemType()
+{
+	if [ $FROM_OTA == 0 ];then
+		if [ x"$(adb shell getprop ro.build.ab_update)" = x"true" ]; then
+			echo ">>> Is A/B System Device"
+			is_ab_update="true"
+		fi
+	fi
+}
+
 function setupMakefile()
 {
 	echo ">>> Setup the Makefile Begin!"
@@ -347,12 +357,19 @@ function setupMakefile()
 		sed -i "s/^[ \t]*vendor_saved_apps[ \t]*\:.*/vendor_saved_apps \:\= $vendor_saved_apps/g" $NEW_MAKEFILE
 	fi
 
+	getSystemType
+	if [ "x$is_ab_update" != "x" ]; then
+		echo ">>> Set PRODUCE_IS_AB_UPDATE: $is_ab_update"
+		sed -i "s/^[ \t]*#PRODUCE_IS_AB_UPDATE[ \t]*\:.*/PRODUCE_IS_AB_UPDATE \:\= $is_ab_update/g" $NEW_MAKEFILE
+	fi
+
 	echo "===================================================="
 	echo "Makefile Configuration:"
-	echo "    vendor_modify_jars := $vendor_modify_jars"
-	echo "    vendor_saved_apps  := $vendor_saved_apps"
-	echo "    DENSITY            := $DENSITY"
-	echo "    RESOLUTION         := $RESOLUTION"
+	echo "    vendor_modify_jars   := $vendor_modify_jars"
+	echo "    vendor_saved_apps    := $vendor_saved_apps"
+	echo "    DENSITY              := $DENSITY"
+	echo "    RESOLUTION           := $RESOLUTION"
+	echo "    PRODUCE_IS_AB_UPDATE := $is_ab_update"
 	echo "===================================================="
 
 	echo ">>> Setup the Makefile Done!"
@@ -390,7 +407,7 @@ function newMakefile()
 {
 	checkRootState
 	setupMakefile
-	prepare_boot_recovery
+	#prepare_boot_recovery
 	initGitIgnore
 }
 
