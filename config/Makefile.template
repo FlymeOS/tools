@@ -54,7 +54,7 @@ vendor_modify_images := boot
 # The default value is Bluetooth.
 # You can configure the apk name in the vendor/system/app or vendor/system/priv-app directory.
 #-----------------------------------------------------------------------------
-vendor_saved_apps := BackupRestoreConfirmation Bluetooth DefaultContainerService ExternalStorageProvider FusedLocation HTMLViewer InputDevices KeyChain PicoTts PrintSpooler ProxyHandler SharedStorageBackup Shell UserDictionaryProvider
+vendor_saved_apps := BackupRestoreConfirmation BlockedNumberProvider Bluetooth BluetoothMidiService BookmarkProvider CarrierConfig CellBroadcastReceiver DefaultContainerService EasterEgg EmergencyInfo ExternalStorageProvider ExtShared FusedLocation HTMLViewer InputDevices KeyChain ManagedProvisioning MtpDocumentsProvider PacProcessor PrintRecommendationService PrintSpooler ProxyHandler SharedStorageBackup Shell StatementService Stk StorageManager Tag UserDictionaryProvider WallpaperBackup WallpaperCropper WAPPushManager
 
 ##############################################################################
 # The value decides which vendor apk you want to modify.
