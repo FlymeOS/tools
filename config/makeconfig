@@ -50,10 +50,10 @@ ERR_MISSION_FAILED=209
 function checkAdbConnect()
 {
 	echo ">>> Check connecting state"
-	adb shell ls /system > /dev/null 2>&1
+        adb devices | grep -w "device" > /dev/null 2>&1
 	if [ $? != "0" ];then
 		echo ">>> Device is not found, Please connect device and pc with USB cable, and open Adb Debug in device."
-		exit $ERR_USB_NOT_CONNECTED
+		#exit $ERR_USB_NOT_CONNECTED
 	fi
 }
 
@@ -66,7 +66,7 @@ function waitForDeviceOnline ()
 	local timeout=30
 	while [ $timeout -gt 0 ]
 	do
-		if adb shell ls /system > /dev/null 2>&1; then
+		if adb devices | grep -w "device" > /dev/null 2>&1 > /dev/null 2>&1; then
 			echo ">>> device is online"
 			break
 		fi
@@ -139,7 +139,7 @@ function checkEnvironment()
 		exit $ERR_MISSION_FAILED
 	fi
 
-	adb shell ls / > /dev/null 2>&1
+	adb devices | grep -w "device" > /dev/null 2>&1
 	if [ $? != 0 -a -f $OTA_PACKAGE ];then
 		echo ">>> Device is not online, but ota.zip is exist."
 		echo ">>> Config Makefile from $OTA_PACKAGE."
